@@ -1,6 +1,6 @@
 #include<fstream>
 
-#include"AST.h"
+#include"../include/AST.h"
 
 
 void print(){}

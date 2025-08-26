@@ -1,4 +1,4 @@
-#include"AST.h"
+#include"../include/AST.h"
 
 NodeAST::NodeAST(Token* _token) : token(_token) {}
 
