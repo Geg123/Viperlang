@@ -8,6 +8,7 @@ enum class TokenType;
 
 
 std::string TokenTypeSwitch(TokenType type);
+TokenType StringToTokenType(std::string type);
 
 struct Token
 {
@@ -33,7 +34,8 @@ struct Lexer
 	void parseVar();
 	void Analys();
 	void TokensSort();
-	std::vector<Token*> tokens;
+
+	std::vector<std::shared_ptr<Token>> tokens;
 	std::string line;
 	int iter = 0;
 	size_t line_size;
