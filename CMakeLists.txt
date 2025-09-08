@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.8)
 
-project(Viper interpretator)
+project(Viper-interpretator)
 
-add_executable(Compiler 
+add_executable(Interpretator
 	src/main.cpp
 	src/Lexer.cpp
 	src/AST.cpp

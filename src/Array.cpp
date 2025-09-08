@@ -41,9 +41,9 @@ void ArrayCreator::CreateArray(std::shared_ptr<NodeAST> node_eq)
 			}
 			return;
 		}
-		else if (var_creator->var_list.count(arr_name))
+		else if (var_crt->var_list.count(arr_name))
 		{
-			var_creator->var_list.erase(arr_name);
+			var_crt->var_list.erase(arr_name);
 		}
 	curr_arr = std::make_shared<Array>(arr_name);
 

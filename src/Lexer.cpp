@@ -1,6 +1,6 @@
 #include"../include/Lexer.h"
 
-enum class TokenType { VAR, EQ, PLUS, MINUS, NUMBER, STRING, SEMICOLON, TAB, IF, END, COLON, NOT, IS_EQ, NOT_EQ, LEFT_BRACKET, RIGHT_BRACKET, IF_END, MULT, DIV, PRINT, COMMA, ARRAY, SQ_LEFT_BRACKET, SQ_RIGHT_BRACKET, ARR_LIST, BOOL, TRUE, FALSE, GREATER, LESS, AND, OR, FUNCTION};
+enum class TokenType { VAR, EQ, PLUS, MINUS, NUMBER, STRING, SEMICOLON, TAB, IF, END, COLON, NOT, IS_EQ, NOT_EQ, LEFT_BRACKET, RIGHT_BRACKET, IF_END, MULT, DIV, PRINT, COMMA, ARRAY, SQ_LEFT_BRACKET, SQ_RIGHT_BRACKET, ARR_LIST, BOOL, TRUE, FALSE, GREATER, LESS, AND, OR, FUNCTION, POINT, RETURN, FUNC_END, FUNC_INIT};
 //std::string regexes[] = { "^[a-zA-Z_].*", "=", "\\+", "\\-", "[0-9]+" ".*", "	", "\""};
 
 bool tab = false;
@@ -42,6 +42,11 @@ std::string TokenTypeSwitch(TokenType type)
 	case 29: return "LESS";
 	case 30: return "AND";
 	case 31: return "OR";
+	case 32: return "FUNCTION";
+	case 33: return "POINT";
+	case 34: return "RETURN";
+	case 35: return "FUNC_END";
+	case 36: return "FUNC_INIT";
 	}
 }
 
@@ -113,6 +118,16 @@ TokenType StringToTokenType(std::string type)
 		return TokenType::AND;
 	else if (type == "OR")
 		return TokenType::OR;
+	else if (type == "POINT")
+		return TokenType::POINT;
+	else if (type == "RETURN")
+		return TokenType::RETURN;
+	else if (type == "FUNC_END")
+		return TokenType::FUNC_END;
+	else if (type == "FUNC_INIT")
+		return TokenType::FUNC_INIT;
+	else if (type == "FUNCTION")
+		return TokenType::FUNCTION;
 }
 
 
@@ -131,12 +146,14 @@ void Lexer::TokensSort()
 				tokens.erase(tokens.begin() + i);
 				tokens[i - 1]->value = "==";
 				tokens[i - 1]->type = TokenType::IS_EQ;
+				--tokens_size;
 			}
 			else if (tokens[i]->type == TokenType::EQ && tokens[i - 1]->type == TokenType::NOT)
 			{
 				tokens.erase(tokens.begin() + i);
 				tokens[i - 1]->value = "!=";
 				tokens[i - 1]->type = TokenType::NOT_EQ;
+				--tokens_size;
 			}
 		}
 		
@@ -212,6 +229,8 @@ void Lexer::parseVar()
 		tokens.push_back(std::make_shared<Token>(TokenType::AND, var));
 	else if (var == "or")
 		tokens.push_back(std::make_shared<Token>(TokenType::OR, var));
+	else if (var == "return")
+		tokens.push_back(std::make_shared<Token>(TokenType::RETURN, var));
 	else
 		tokens.push_back(std::make_shared<Token>(TokenType::VAR, var));
 }
@@ -219,11 +238,6 @@ void Lexer::parseVar()
 void Lexer::Analys()
 {
 	//std::regex regular(R"((^[a-zA-Z_].*|=|\\+|\\-|\\d+|^\".*\"$)|\t| )");
-	if (line[0] != '\t' && tab == true) 
-	{
-		tab = false;
-		tokens.push_back(std::make_shared<Token>(TokenType::IF_END, ""));
-	}
 	char current;
 
 	line_size = line.size();
@@ -241,6 +255,8 @@ void Lexer::Analys()
 			tokens.push_back(std::make_shared<Token>(TokenType::EQ, "="));
 			++iter;
 		}
+		else if (current == ' ')
+			++iter;
 		else if (current == ';') {
 			tokens.push_back(std::make_shared<Token>(TokenType::SEMICOLON, ";"));
 			++iter;
@@ -261,8 +277,16 @@ void Lexer::Analys()
 			tokens.push_back(std::make_shared<Token>(TokenType::NOT, "!"));
 			++iter;
 		}
+		else if (current == '\t') {
+			tokens.push_back(std::make_shared<Token>(TokenType::TAB, "\t"));
+			++iter;
+		}
 		else if(current == ':') {
 			tokens.push_back(std::make_shared<Token>(TokenType::COLON, ":"));
+			++iter;
+		}
+		else if (current == '.') {
+			tokens.push_back(std::make_shared<Token>(TokenType::POINT, "."));
 			++iter;
 		}
 		else if(current == '\t') {
@@ -305,8 +329,6 @@ void Lexer::Analys()
 			parseNumber();
 		else if (current == '\"')
 			parseString();
-		else if (current == ' ')
-			++iter;
 		else
 		{
 			bool is_var = false;

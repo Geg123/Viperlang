@@ -1,11 +1,11 @@
 
 
-#include"../include/Interpretator.h"
+#include"../include/Var.h"
 
 
 int main()
 {
-	Interpretator main("C:/booltest2.txt");
+	Interpretator main("C:/func_test.txt");
 }
 
 
