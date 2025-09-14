@@ -156,15 +156,15 @@ std::shared_ptr<NodeAST> Interpretator::runtime_func(size_t iter, size_t end_ite
 		if (node_type == "EQ")
 		{
 			if (TokenTypeSwitch(ast->line_nodes[iter]->right->token->type) == "ARR_LIST")
-				var_crt.arr_creator->CreateArray(ast->line_nodes[iter]);
+				function->func_var_crt->arr_creator->CreateArray(ast->line_nodes[iter]);
 			else if (TokenTypeSwitch(ast->line_nodes[iter]->left->token->type) == "ARRAY")
-				var_crt.arr_creator->setArrIndex(ast->line_nodes[iter]);
+				function->func_var_crt->arr_creator->setArrIndex(ast->line_nodes[iter]);
 			else
-				var_crt.CreateVariables(ast->line_nodes[iter]);
+				function->func_var_crt->CreateVariables(ast->line_nodes[iter]);
 		}
 		else if (node_type == "IF")
 		{
-			if (var_crt.parseASTNode(ast->line_nodes[iter]->right)->token->value == "false")
+			if (function->func_var_crt->parseASTNode(ast->line_nodes[iter]->right)->token->value == "false")
 			{
 				while (ast->line_nodes[iter]->token->type != StringToTokenType("IF_END"))
 				{
@@ -187,22 +187,7 @@ std::shared_ptr<NodeAST> Interpretator::runtime_func(size_t iter, size_t end_ite
 
 void Interpretator::print(std::shared_ptr<NodeAST> node)
 {
-	/*if (TokenTypeSwitch(node->right->token->type) == "VAR")
-	{
-		std::string var_name = node->right->token->value;
-		size_t size = var_crt.var_list.size();
-			if (var_crt.var_list.count(var_name))
-			{
-				std::cout << var_crt.var_list[var_name]->value << "\n";
-				return;
-			}
-		std::cout << "Error: var \"" << var_name << "\" doesn't exist\n";
-		system("pause");
-	}
-	else
-		std::cout << node->right->token->value << "\n";*/
-
-	var_crt.parseASTNode(node->right);
+	node->right = var_crt.parseASTNode(node->right);
 	std::cout << node->right->token->value << "\n";
 	return;
 

@@ -42,14 +42,12 @@ struct VarCreator
     std::shared_ptr<NodeAST> parseASTNode(std::shared_ptr<NodeAST> node);
     std::shared_ptr<NodeAST> parseASTNode(std::shared_ptr<NodeAST> node, std::shared_ptr<Function> func);
     VarType TypeInit(std::shared_ptr<NodeAST> node);
+    std::shared_ptr<NodeAST> func_node_parse(std::shared_ptr<NodeAST> node);
+
     std::shared_ptr<ArrayCreator> arr_creator;
     std::shared_ptr<FuncCreator> func_creator;
     Interpretator* my_interpretator;
     //std::shared_ptr<NodeAST> VarCreator::runtime(size_t iter, size_t end_iter, std::shared_ptr<Function> function, bool f);
-    ~VarCreator()
-    {
-        delete my_interpretator;
-    }
 };
 
 struct Array

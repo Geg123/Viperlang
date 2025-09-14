@@ -1,6 +1,7 @@
 #include"../include/Lexer.h"
 
-enum class TokenType { VAR, EQ, PLUS, MINUS, NUMBER, STRING, SEMICOLON, TAB, IF, END, COLON, NOT, IS_EQ, NOT_EQ, LEFT_BRACKET, RIGHT_BRACKET, IF_END, MULT, DIV, PRINT, COMMA, ARRAY, SQ_LEFT_BRACKET, SQ_RIGHT_BRACKET, ARR_LIST, BOOL, TRUE, FALSE, GREATER, LESS, AND, OR, FUNCTION, POINT, RETURN, FUNC_END, FUNC_INIT};
+enum class TokenType { VAR, EQ, PLUS, MINUS, NUMBER, STRING, SEMICOLON, TAB, IF, END, COLON, NOT, IS_EQ, NOT_EQ, LEFT_BRACKET, RIGHT_BRACKET, IF_END, MULT, DIV, PRINT, COMMA, ARRAY, SQ_LEFT_BRACKET, SQ_RIGHT_BRACKET, ARR_LIST, BOOL, TRUE, FALSE, GREATER, LESS, AND, OR, FUNCTION, POINT, RETURN, FUNC_END, FUNC_INIT, INPUT, INT
+};
 //std::string regexes[] = { "^[a-zA-Z_].*", "=", "\\+", "\\-", "[0-9]+" ".*", "	", "\""};
 
 bool tab = false;
@@ -47,6 +48,8 @@ std::string TokenTypeSwitch(TokenType type)
 	case 34: return "RETURN";
 	case 35: return "FUNC_END";
 	case 36: return "FUNC_INIT";
+	case 37: return "INPUT";
+	case 38: return "INT";
 	}
 }
 
@@ -128,6 +131,10 @@ TokenType StringToTokenType(std::string type)
 		return TokenType::FUNC_INIT;
 	else if (type == "FUNCTION")
 		return TokenType::FUNCTION;
+	else if (type == "INPUT")
+		return TokenType::INPUT;
+	else if (type == "INT")
+		return TokenType::INT;
 }
 
 
@@ -221,6 +228,8 @@ void Lexer::parseVar()
 		tokens.push_back(std::make_shared<Token>(TokenType::IF, var));
 	else if(var == "print")
 		tokens.push_back(std::make_shared<Token>(TokenType::PRINT, var));
+	else if (var == "input")
+		tokens.push_back(std::make_shared<Token>(TokenType::INPUT, var));
 	else if (var == "true")
 		tokens.push_back(std::make_shared<Token>(TokenType::TRUE, var));
 	else if (var == "false")
@@ -231,6 +240,8 @@ void Lexer::parseVar()
 		tokens.push_back(std::make_shared<Token>(TokenType::OR, var));
 	else if (var == "return")
 		tokens.push_back(std::make_shared<Token>(TokenType::RETURN, var));
+	else if (var == "int")
+		tokens.push_back(std::make_shared<Token>(TokenType::INT, var));
 	else
 		tokens.push_back(std::make_shared<Token>(TokenType::VAR, var));
 }

@@ -5,7 +5,9 @@
 
 int main()
 {
-	Interpretator main("C:/func_test.txt");
+	setlocale(LC_ALL, "ru");
+
+	Interpretator main("C:/test.txt");
 }
 
 

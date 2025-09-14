@@ -63,23 +63,93 @@ std::shared_ptr<NodeAST> VarCreator::parseASTNode(std::shared_ptr<NodeAST> node)
 	{
 		return node;
 	}
+	else if (token_type == "INT")
+	{
+		node = parseASTNode(node->right);
+
+		std::string tmp_type = TokenTypeSwitch(node->token->type);
+
+		if (tmp_type == "BOOL")
+		{
+			if (node->token->value == "true")
+			{
+				node->token->value = "1";
+			}
+			else 
+				node->token->value = "0";
+		}
+		else if (tmp_type == "STRING")
+		{
+			int size = node->token->value.size();
+			char tmp;
+
+			for (int i = 0; i < size; ++i)
+			{
+				char tmp = node->token->value[i];
+				if (tmp == '1' || tmp == '2' || tmp == '3' || tmp == '4' || tmp == '5' || tmp == '6' || tmp == '7' || tmp == '8' || tmp == '9' || tmp == '0')
+					continue;
+				else
+				{
+					std::cout << "Error: int could't contain NOT INT value\n";
+					system("pause");
+				}
+			}
+		}
+
+		node->token->type = StringToTokenType("NUMBER");
+
+		return node;
+	}
+	else if (token_type == "INPUT")
+	{
+		std::string res;
+
+		if (node->right != nullptr)
+		{
+			std::cout << node->right->token->value;
+		}
+
+		std::getline(std::cin, res);
+
+
+		node->token->type = StringToTokenType("STRING");
+		node->token->value = res;
+
+		return node;
+	}
 	else if (token_type == "FUNCTION")
 	{
 		std::string func_name = node->token->value;
 		if (my_interpretator->func_crt.functions_list.count(func_name))
 		{
-			std::shared_ptr<NodeAST> tmp = std::make_shared<NodeAST>(node->token);
+			std::shared_ptr<NodeAST> tmp;
 			std::shared_ptr<Function> func = my_interpretator->func_crt.functions_list[func_name];
 			size_t iter = 0;
 			while (node->right != nullptr)
 			{
 				node = node->right;
 				
-				func->func_var_crt->var_list[func->vars_names[iter]]->value = node->token->value;
-				func->func_var_crt->var_list[func->vars_names[iter]]->type = func->func_var_crt->TypeInit(node);
+				func->func_var_crt->var_list[func->vars_names[iter]]->value = parseASTNode(node)->token->value;
+				func->func_var_crt->var_list[func->vars_names[iter++]]->type = func->func_var_crt->TypeInit(node);
 			}
 			node = my_interpretator->runtime_func(func->line_nodes_index, func->last_line_nodes_index, func, true);
-			return parseASTNode(node, func);
+			
+
+			std::shared_ptr<NodeAST> tmp_not_ptr = func_node_parse(node);
+
+			tmp = parseASTNode(tmp_not_ptr, func);
+
+			iter = 0;
+
+			size_t size = func->vars_names.size();
+
+			while (iter < size)
+			{
+				func->func_var_crt->var_list[func->vars_names[iter]]->value = "";
+				func->func_var_crt->var_list[func->vars_names[iter++]]->type = VarType::INT;
+			}
+
+			return tmp;
 		}
 		return node;
 	}
@@ -821,9 +891,9 @@ std::shared_ptr<NodeAST> VarCreator::parseASTNode(std::shared_ptr<NodeAST> node,
 		}
 		else
 		{
-			node->left = parseASTNode(node->left);
-			node->right = parseASTNode(node->right);
-			parseASTNode(node);
+			node->left = parseASTNode(node->left, func);
+			node->right = parseASTNode(node->right, func);
+			parseASTNode(node, func);
 			return node;
 		}
 
@@ -883,9 +953,9 @@ std::shared_ptr<NodeAST> VarCreator::parseASTNode(std::shared_ptr<NodeAST> node,
 		}
 		else
 		{
-			node->left = parseASTNode(node->left);
-			node->right = parseASTNode(node->right);
-			parseASTNode(node);
+			node->left = parseASTNode(node->left, func);
+			node->right = parseASTNode(node->right, func);
+			parseASTNode(node, func);
 			return node;
 		}
 	}
@@ -1022,9 +1092,9 @@ std::shared_ptr<NodeAST> VarCreator::parseASTNode(std::shared_ptr<NodeAST> node,
 		}
 		else
 		{
-			node->left = parseASTNode(node->left);
-			node->right = parseASTNode(node->right);
-			parseASTNode(node);
+			node->left = parseASTNode(node->left, func);
+			node->right = parseASTNode(node->right, func);
+			parseASTNode(node, func);
 			return node;
 		}
 
@@ -1047,9 +1117,9 @@ std::shared_ptr<NodeAST> VarCreator::parseASTNode(std::shared_ptr<NodeAST> node,
 		}
 		else
 		{
-			node->left = parseASTNode(node->left);
-			node->right = parseASTNode(node->right);
-			parseASTNode(node);
+			node->left = parseASTNode(node->left, func);
+			node->right = parseASTNode(node->right, func);
+			parseASTNode(node, func);
 			return node;
 		}
 	}
@@ -1071,9 +1141,9 @@ std::shared_ptr<NodeAST> VarCreator::parseASTNode(std::shared_ptr<NodeAST> node,
 		}
 		else
 		{
-			node->left = parseASTNode(node->left);
-			node->right = parseASTNode(node->right);
-			parseASTNode(node);
+			node->left = parseASTNode(node->left, func);
+			node->right = parseASTNode(node->right, func);
+			parseASTNode(node, func);
 			return node;
 		}
 	}
@@ -1158,9 +1228,9 @@ std::shared_ptr<NodeAST> VarCreator::parseASTNode(std::shared_ptr<NodeAST> node,
 		}
 		else
 		{
-			node->left = parseASTNode(node->left);
-			node->right = parseASTNode(node->right);
-			parseASTNode(node);
+			node->left = parseASTNode(node->left, func);
+			node->right = parseASTNode(node->right, func);
+			parseASTNode(node, func);
 			return node;
 		}
 	}
@@ -1182,9 +1252,9 @@ std::shared_ptr<NodeAST> VarCreator::parseASTNode(std::shared_ptr<NodeAST> node,
 		}
 		else
 		{
-			node->left = parseASTNode(node->left);
-			node->right = parseASTNode(node->right);
-			parseASTNode(node);
+			node->left = parseASTNode(node->left, func);
+			node->right = parseASTNode(node->right, func);
+			parseASTNode(node, func);
 			return node;
 		}
 	}
@@ -1204,6 +1274,23 @@ VarType VarCreator::TypeInit(std::shared_ptr<NodeAST> node)
 		std::cout << "Error: var type has not idintified!\n";
 		system("pause");
 	}
+}
+
+std::shared_ptr<NodeAST> VarCreator::func_node_parse(std::shared_ptr<NodeAST> node)
+{
+	std::shared_ptr<Token> token = std::make_shared<Token>(node->token->type, node->token->value);
+
+	std::shared_ptr<NodeAST> root = std::make_shared<NodeAST>(token);
+	if (node->left != nullptr)
+	{
+		root->left = func_node_parse(node->left);
+	}
+	if (node->right != nullptr)
+	{
+		root->right = func_node_parse(node->right);
+	}
+
+	return root;
 }
 
 /*std::shared_ptr<NodeAST> Interpretator::runtime_func(size_t iter, size_t end_iter, std::shared_ptr<Function> function, bool f)
