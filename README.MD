@@ -30,6 +30,5 @@ Geg(github.com/Geg123)
   func(params):
     code
     return x
-
   sum(a,b):
     return a + b
