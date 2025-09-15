@@ -23,7 +23,6 @@ Geg(github.com/Geg123)
 4. Условные конструкции:
   if statement:
     код
-
   if a == true and b != 5:
     print("True")
 
