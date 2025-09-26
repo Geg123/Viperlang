@@ -1,4 +1,4 @@
-#include"../include/Var.h"
+#include"../include/Creator.h"
 
 enum class VarType {INT, STRING, BOOL, FLOAT};
 
@@ -104,6 +104,10 @@ std::shared_ptr<NodeAST> VarCreator::parseASTNode(std::shared_ptr<NodeAST> node)
 	{
 		std::string res;
 
+		TokenType token = node->token->type;
+
+		std::shared_ptr<NodeAST> tmp = std::make_shared<NodeAST>(std::make_shared<Token>(token, ""));
+
 		if (node->right != nullptr)
 		{
 			std::cout << node->right->token->value;
@@ -112,10 +116,10 @@ std::shared_ptr<NodeAST> VarCreator::parseASTNode(std::shared_ptr<NodeAST> node)
 		std::getline(std::cin, res);
 
 
-		node->token->type = StringToTokenType("STRING");
-		node->token->value = res;
+		tmp->token->type = StringToTokenType("STRING");
+		tmp->token->value = res;
 
-		return node;
+		return tmp;
 	}
 	else if (token_type == "FUNCTION")
 	{
@@ -165,27 +169,33 @@ std::shared_ptr<NodeAST> VarCreator::parseASTNode(std::shared_ptr<NodeAST> node)
 	}
 	else if (token_type == "VAR")
 	{
-		std::string var_name = node->token->value;
+		std::string value = node->token->value;
+
+		TokenType token = node->token->type;
+
+		std::shared_ptr<NodeAST> tmp = std::make_shared<NodeAST>(std::make_shared<Token>(token, value));
+
+		std::string var_name = tmp->token->value;
 		size_t size = list_iter + 1;
 			if (var_list.count(var_name))
 			{
 				if (var_list[var_name]->type == VarType::INT)
 				{
-					node->token->type = StringToTokenType("NUMBER");
-					node->token->value = var_list[var_name]->value;
-					return node;
+					tmp->token->type = StringToTokenType("NUMBER");
+					tmp->token->value = var_list[var_name]->value;
+					return tmp;
 				}
 				else if (var_list[var_name]->type == VarType::STRING)
 				{
-					node->token->type = StringToTokenType("STRING");
-					node->token->value = var_list[var_name]->value;
-					return node;
+					tmp->token->type = StringToTokenType("STRING");
+					tmp->token->value = var_list[var_name]->value;
+					return tmp;
 				}
 				else if (var_list[var_name]->type == VarType::BOOL)
 				{
-					node->token->type = StringToTokenType("BOOL");
-					node->token->value = var_list[var_name]->value;
-					return node;
+					tmp->token->type = StringToTokenType("BOOL");
+					tmp->token->value = var_list[var_name]->value;
+					return tmp;
 				}
 			}
 		std::cout << "Error: var "<< var_name << "doesn't exist\n";
@@ -456,6 +466,63 @@ std::shared_ptr<NodeAST> VarCreator::parseASTNode(std::shared_ptr<NodeAST> node)
 			return node;
 		}
 	}
+	else if (token_type == "MODULE")
+	{
+		std::string left = TokenTypeSwitch(node->left->token->type);
+		std::string right = TokenTypeSwitch(node->right->token->type);
+
+		if (left == "NUMBER" && right == "NUMBER")
+		{
+			node->token->type = StringToTokenType("NUMBER");
+			node->token->value = std::to_string(std::stoi(node->left->token->value) % std::stoi(node->right->token->value));
+			return node;
+		}
+		else if (left == "VAR" && right == "NUMBER")
+		{
+			std::string var_name = node->left->token->value;
+			bool found = false;
+			size_t size = list_iter + 1;
+			if (var_list.count(var_name))
+			{
+				found = true;
+				if (var_list[var_name]->type == VarType::INT)
+				{
+					node->token->type = StringToTokenType("NUMBER");
+					node->token->value = std::to_string(std::stoi(var_list[var_name]->value) % std::stoi(node->right->token->value));
+					return node;
+				}
+			}
+
+		}
+		else if (left == "NUMBER" && right == "VAR")
+		{
+			std::string var_name = node->right->token->value;
+			bool found = false;
+			size_t size = list_iter + 1;
+			if (var_list.count(var_name))
+			{
+				found = true;
+				if (var_list[var_name]->type == VarType::INT)
+				{
+					node->token->type = StringToTokenType("NUMBER");
+					node->token->value = std::to_string(std::stoi(var_list[var_name]->value) % std::stoi(node->left->token->value));
+					return node;
+				}
+			}
+		}
+		/*else if (left == "STRING" && right == "NUMBER")
+		{
+			node->token->type = StringToTokenType("STRING");
+			int x = std::stoi(node->right->token->value);
+			node->token->value = "";
+			std::string str_tmp = node->left->token->value;
+			while (x) {
+				node->token->value += str_tmp;
+				--x;
+			}
+			return node;
+		}*/
+		}
 	else if (token_type == "DIV")
 	{
 		std::string left = TokenTypeSwitch(node->left->token->type);
@@ -1260,7 +1327,6 @@ std::shared_ptr<NodeAST> VarCreator::parseASTNode(std::shared_ptr<NodeAST> node,
 	}
 }
 
-VarType VarCreator::TypeInit(std::shared_ptr<NodeAST> node)
 {
 	std::string type = TokenTypeSwitch(node->token->type);
 

@@ -1,10 +1,10 @@
-#include"../include/AST.h"
+#include"../include/Parser.h"
 
 NodeAST::NodeAST(std::shared_ptr<Token> _token) : token(_token) {}
 
-AST::AST(Lexer* _lexer): lexer(_lexer){}
+Parser::Parser(Lexer* _lexer): lexer(_lexer){}
 
-std::shared_ptr<NodeAST> AST::parseExpr(size_t iter, size_t end_iter)
+std::shared_ptr<NodeAST> Parser::parseExpr(size_t iter, size_t end_iter)
 {
 	std::vector<std::shared_ptr<NodeAST>> nodes;
 
@@ -26,6 +26,11 @@ std::shared_ptr<NodeAST> AST::parseExpr(size_t iter, size_t end_iter)
 			mult = true;
 		}
 		else if (type == "DIV")
+		{
+			nodes.push_back(std::make_shared<NodeAST>(lexer->tokens[i]));
+			mult = true;
+		}
+		else if (type == "MODULE")
 		{
 			nodes.push_back(std::make_shared<NodeAST>(lexer->tokens[i]));
 			mult = true;
@@ -254,6 +259,14 @@ std::shared_ptr<NodeAST> AST::parseExpr(size_t iter, size_t end_iter)
 				nodes.erase(nodes.begin() + i - 1);
 				--i;
 			}
+			else if (TokenTypeSwitch(nodes[i]->token->type) == "MODULE")
+			{
+				nodes[i]->right = nodes[i + 1];
+				nodes[i]->left = nodes[i - 1];
+				nodes.erase(nodes.begin() + i + 1);
+				nodes.erase(nodes.begin() + i - 1);
+				--i;
+			}
 			--i;
 		}
 	}
@@ -364,12 +377,12 @@ std::shared_ptr<NodeAST> AST::parseExpr(size_t iter, size_t end_iter)
 	return nodes[0];
 }
 
-std::shared_ptr<NodeAST> AST::parseIF(size_t iter, size_t end_iter) 
+std::shared_ptr<NodeAST> Parser::parseIF(size_t iter, size_t end_iter) 
 {
 	return nullptr;
 }
 
-std::shared_ptr<NodeAST> AST::parseArray(size_t iter, size_t end_iter)
+std::shared_ptr<NodeAST> Parser::parseArray(size_t iter, size_t end_iter)
 {
 	std::shared_ptr<NodeAST> nodes = std::make_shared<NodeAST>(std::make_shared<Token>(StringToTokenType("ARR_LIST"),""));
 	size_t node_iter = 0;
@@ -425,7 +438,7 @@ std::shared_ptr<NodeAST> AST::parseArray(size_t iter, size_t end_iter)
 }
 
 
-std::shared_ptr<NodeAST> AST::parseArrayIndex(size_t right_bracket)
+std::shared_ptr<NodeAST> Parser::parseArrayIndex(size_t right_bracket)
 {
 	std::shared_ptr<NodeAST> root;
 
@@ -452,7 +465,7 @@ std::shared_ptr<NodeAST> AST::parseArrayIndex(size_t right_bracket)
 	}
 }
 
-std::shared_ptr<NodeAST> AST::parseFuncInit(size_t iter, size_t end_iter)
+std::shared_ptr<NodeAST> Parser::parseFuncInit(size_t iter, size_t end_iter)
 {
 	std::shared_ptr<NodeAST> nodes = std::make_shared<NodeAST>(lexer->tokens[iter - 2]);
 	std::shared_ptr<NodeAST> res = nodes;
@@ -503,7 +516,23 @@ std::shared_ptr<NodeAST> AST::parseFuncInit(size_t iter, size_t end_iter)
 	return res;
 }
 
-void AST::Analys()
+std::shared_ptr<NodeAST> Parser::parseFor(size_t iter, size_t end_iter)
+{
+	std::shared_ptr<NodeAST> root = std::make_shared<NodeAST>(lexer->tokens[iter - 1]);
+
+	if (lexer->tokens[iter]->type == StringToTokenType("VAR"))
+	{
+		root->left = std::make_shared<NodeAST>(lexer->tokens[iter]);
+
+		if (lexer->tokens[iter + 1]->type == StringToTokenType("IN") && lexer->tokens[iter + 2]->type == StringToTokenType("RANGE") && lexer->tokens[iter + 3]->type == StringToTokenType("LEFT_BRACKET"))
+		{
+			root->right = parseExpr(iter + 4, end_iter - 1);
+			return root;
+		}
+	}
+}
+
+void Parser::Analys()
 {
 	std::shared_ptr<NodeAST> root;
 	size_t tokens_size = lexer->tokens.size();
@@ -512,18 +541,28 @@ void AST::Analys()
 
 	unsigned char if_tab_q = 0;
 	unsigned char func_tab_q = 0;
+	unsigned char cycle_tab_q = 0;
 
 	bool last_end = false;
 	
 
 	for (size_t i = 0; i < tokens_size; ++i)
 	{
+		if (lexer->tokens.size() <= i)
+		{
+			root = std::make_shared<NodeAST>(std::make_shared<Token>(StringToTokenType("FOR_END"), ""));
+			//root->token->type = StringToTokenType("IF_END");
+			--cycle_tab_q;
+			line_nodes.push_back(root);
+			return;
+		}
+
 		std::string type = TokenTypeSwitch(lexer->tokens[i]->type);
 		size_t tabs = 0;
 		for (; TokenTypeSwitch(lexer->tokens[i]->type) == "TAB"; ++tabs, ++i){}
 		type = TokenTypeSwitch(lexer->tokens[i]->type);
 
-		if (tabs < (if_tab_q + func_tab_q))
+		if (tabs < (if_tab_q + func_tab_q + cycle_tab_q))
 		{
 			if (tabs < func_tab_q)
 			{
@@ -531,11 +570,19 @@ void AST::Analys()
 				--func_tab_q;
 				line_nodes.push_back(root);
 			}
-			if ((tabs - func_tab_q) < if_tab_q)
+			if ((tabs - func_tab_q - cycle_tab_q) < if_tab_q)
 			{
 				root = std::make_shared<NodeAST>(std::make_shared<Token>(StringToTokenType("IF_END"), ""));
 				//root->token->type = StringToTokenType("IF_END");
 				--if_tab_q;
+				line_nodes.push_back(root);
+			}
+			if ((tabs - func_tab_q - if_tab_q) < cycle_tab_q)
+			{
+				root = std::make_shared<NodeAST>(std::make_shared<Token>(StringToTokenType("FOR_END"), ""));
+				//root->token->type = StringToTokenType("IF_END");
+				--cycle_tab_q;
+				--tokens_size;
 				line_nodes.push_back(root);
 			}
 		}
@@ -695,6 +742,17 @@ void AST::Analys()
 			++if_tab_q;
 			i = j+1;
 		}
+		else if (type == "FOR")
+		{
+			root = std::make_shared<NodeAST>(lexer->tokens[i]);
+			size_t j = i + 1;
+			for (; TokenTypeSwitch(lexer->tokens[j]->type) != "COLON"; ++j);
+			root = parseFor(i + 1, j);
+			line_nodes.push_back(root);
+			++cycle_tab_q;
+			i = j + 1;
+			++tokens_size;
+		}
 		else if (type == "RETURN")
 		{
 			root = std::make_shared<NodeAST>(lexer->tokens[i]);
@@ -724,7 +782,7 @@ void AST::Analys()
 		}
 		else if (type == "PRINT")
 		{
-			//определение границ print'а и вызов parsePrint();
+			//пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ print'пїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ parsePrint();
 			if (TokenTypeSwitch(lexer->tokens[i + 1]->type) != "LEFT_BRACKET")
 				//throw "Doesn't ( after print";
 			{

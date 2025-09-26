@@ -1,12 +1,11 @@
 #include"../include/Lexer.h"
 
-enum class TokenType { VAR, EQ, PLUS, MINUS, NUMBER, STRING, SEMICOLON, TAB, IF, END, COLON, NOT, IS_EQ, NOT_EQ, LEFT_BRACKET, RIGHT_BRACKET, IF_END, MULT, DIV, PRINT, COMMA, ARRAY, SQ_LEFT_BRACKET, SQ_RIGHT_BRACKET, ARR_LIST, BOOL, TRUE, FALSE, GREATER, LESS, AND, OR, FUNCTION, POINT, RETURN, FUNC_END, FUNC_INIT, INPUT, INT
-};
+
 //std::string regexes[] = { "^[a-zA-Z_].*", "=", "\\+", "\\-", "[0-9]+" ".*", "	", "\""};
 
 bool tab = false;
 
-std::string TokenTypeSwitch(TokenType type)
+/*std::string TokenTypeSwitch(TokenType type)
 {
 	int int_type = static_cast<int>(type);
 	switch (int_type)
@@ -50,6 +49,11 @@ std::string TokenTypeSwitch(TokenType type)
 	case 36: return "FUNC_INIT";
 	case 37: return "INPUT";
 	case 38: return "INT";
+	case 39: return "MODULE";
+	case 40: return "FOR";
+	case 41: return "FOR_END";
+	case 42: return "IN";
+	case 43: return "RANGE";
 	}
 }
 
@@ -135,8 +139,18 @@ TokenType StringToTokenType(std::string type)
 		return TokenType::INPUT;
 	else if (type == "INT")
 		return TokenType::INT;
+	else if (type == "MODULE")
+		return TokenType::MODULE;
+	else if (type == "FOR")
+		return TokenType::FOR;
+	else if (type == "FOR_END")
+		return TokenType::FOR_END;
+	else if (type == "IN")
+		return TokenType::IN;
+	else if (type == "RANGE")
+		return TokenType::RANGE;
 }
-
+*/
 
 Lexer::Lexer(std::string _line) : line(_line) {}
 Lexer::Lexer(){}
@@ -242,6 +256,12 @@ void Lexer::parseVar()
 		tokens.push_back(std::make_shared<Token>(TokenType::RETURN, var));
 	else if (var == "int")
 		tokens.push_back(std::make_shared<Token>(TokenType::INT, var));
+	else if (var == "for")
+		tokens.push_back(std::make_shared<Token>(TokenType::FOR, var));
+	else if (var == "in")
+		tokens.push_back(std::make_shared<Token>(TokenType::IN, var));
+	else if (var == "range")
+		tokens.push_back(std::make_shared<Token>(TokenType::RANGE, var));
 	else
 		tokens.push_back(std::make_shared<Token>(TokenType::VAR, var));
 }
@@ -282,6 +302,10 @@ void Lexer::Analys()
 		}
 		else if(current =='*') {
 			tokens.push_back(std::make_shared<Token>(TokenType::MULT, "*"));
+			++iter;
+		}
+		else if (current == '%') {
+			tokens.push_back(std::make_shared<Token>(TokenType::MODULE, "%"));
 			++iter;
 		}
 		else if (current == '!') {

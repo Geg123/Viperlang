@@ -1,13 +1,13 @@
 
 
-#include"../include/Var.h"
+#include"../include/Interpretator.h"
 
 
 int main()
 {
 	setlocale(LC_ALL, "ru");
 
-	Interpretator main("C:/test.txt");
+	Interpretator main("C:/test.geg");
 }
 
 

@@ -1,4 +1,4 @@
-#include"../include/Var.h"
+#include"../include/Creator.h"
 #include<fstream>
 
 
@@ -70,6 +70,32 @@ void Interpretator::runtime()
 				}
 			}
 		}
+		else if (node_type == "FOR")
+		{
+			std::string iterator = ast->line_nodes[i]->left->token->value;
+
+			std::shared_ptr<Variable> tmp = std::make_shared<Variable>(iterator);
+			tmp->type = StringToVarType("INT");
+			tmp->value = "0";
+
+			var_crt.var_list.insert({ iterator, tmp });
+
+			size_t start = i + 1;
+			size_t end = start;
+
+			while (ast->line_nodes[i]->token->type != StringToTokenType("FOR_END"))
+			{
+				++end;
+				++i;
+			}
+
+			while (std::stoi(var_crt.var_list[iterator]->value) < std::stoi(var_crt.parseASTNode(ast->line_nodes[start - 1]->right)->token->value))
+			{
+				runtime(start, end - 1);
+				var_crt.var_list[iterator]->value = std::to_string(std::stoi(var_crt.var_list[iterator]->value) + 1);
+			}
+			i = end - 1;
+		}
 		else if (node_type == "FUNC_INIT")
 		{
 			func_crt.CreateFunc(ast->line_nodes[i]);
@@ -98,7 +124,7 @@ void Interpretator::runtime()
 					++var_iter;
 				}
 
-				runtime(func_crt.functions_list[ast->line_nodes[i]->token->value]->line_nodes_index, func_crt.functions_list[ast->line_nodes[i]->token->value]->last_line_nodes_index, func_crt.functions_list[ast->line_nodes[i]->token->value]);
+				runtime_func(func_crt.functions_list[ast->line_nodes[i]->token->value]->line_nodes_index, func_crt.functions_list[ast->line_nodes[i]->token->value]->last_line_nodes_index, func_crt.functions_list[ast->line_nodes[i]->token->value], true);
 			}
 		}
 		else if (node_type == "PRINT")
@@ -108,7 +134,7 @@ void Interpretator::runtime()
 	}
 }
 
-void Interpretator::runtime(size_t iter, size_t end_iter, std::shared_ptr<Function> function)
+void Interpretator::runtime(size_t iter, size_t end_iter)
 {
 
 	for (; iter < end_iter; ++iter)
@@ -141,7 +167,7 @@ void Interpretator::runtime(size_t iter, size_t end_iter, std::shared_ptr<Functi
 		else if (node_type == "PRINT")
 		{
 			std::shared_ptr<NodeAST> node = std::make_shared<NodeAST>(std::make_shared<Token>(StringToTokenType("PRINT"), ""));
-			node->right	= function->func_var_crt->parseASTNode(ast->line_nodes[iter]->right);
+			node->right	= var_crt.parseASTNode(ast->line_nodes[iter]->right);
 			print(node);
 		}
 	}
