@@ -9,5 +9,4 @@ add_executable(Interpretator
 	src/Var.cpp
 	src/Array.cpp
 	src/Interpretator.cpp
-	src/Func.cpp
 )

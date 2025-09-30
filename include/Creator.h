@@ -1,5 +1,4 @@
 #include"Operators.h"
-#include<unordered_map>
 
 struct Creator
 {
@@ -10,23 +9,24 @@ struct Creator
 struct ObjectCreator
 {
 private:
-    Creator* creator;
+    OperatorsManager OpManager;
 public:
-    void CreateObject();
+    ObjectCreator(std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> map);
+    void CreateObject(Creator* creator);
 };
 
 struct VarCreator : Creator
 {
-    void CreateObject(std::shared_ptr<NodeAST> node);
+    //void CreateObject(std::shared_ptr<NodeAST> node);
 };
 
 struct ArrayCreator : Creator
 {
-    void CreateObject(std::shared_ptr<NodeAST> node);
+    //void CreateObject(std::shared_ptr<NodeAST> node);
 };
 
 struct FuncCreator : Creator
 {
-    void CreateObject(std::shared_ptr<NodeAST> node);
+    //void CreateObject(std::shared_ptr<NodeAST> node);
 };
 

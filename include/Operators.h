@@ -3,79 +3,49 @@
 struct Operator
 {
     virtual ~Operator(){}
-    virtual std::shared_ptr<NodeAST> operation(std::shared_ptr<NodeAST> node) = 0;
+    virtual std::shared_ptr<NodeAST> operation(std::shared_ptr<NodeAST> node);
+};
+
+struct Type
+{
+    ~Type(){}
 };
 
 struct OperatorsManager
 {
 private:
+    std::weak_ptr<std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>>> objects;
     Operator* _operator;
+    Type* type;
 public:
-    Operator* TokenTypeToOperator(std::shared_ptr<NodeAST> node);//is used by DoOperation()
-    void DoOperation(std::shared_ptr<NodeAST> node, Operator* type);
+    OperatorsManager(std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> _objects){}
+    Type* TokenTypeToType(std::shared_ptr<NodeAST> node);//is used by DoOperation()
+    Operator* NodeTypeToOperator(std::shared_ptr<NodeAST> node);
+    void DoOperation(std::shared_ptr<NodeAST> node);
 };
 
-struct EqOperator : Operator
-{
-    std::shared_ptr<NodeAST> operation(std::shared_ptr<NodeAST> node);
-};
+struct EqOperator : Operator{};
+struct PlusOperator : Operator{};
+struct MinusOperator : Operator{};
+struct MultOperator : Operator{};
+struct DivOperator : Operator{};
+struct PowerOperator : Operator{};
+struct IsEqOperator : Operator{};
+struct NotEqOperator : Operator{};
+struct NotOperator : Operator{};
+struct AndOperator : Operator{};
+struct OrOperator : Operator{};
+struct GreaterOperator : Operator{};
+struct LessOperator : Operator{};
 
-struct PlusOperator : Operator
+struct NotFullType : Type{};
+struct Bool : Type
 {
-    std::shared_ptr<NodeAST> operation(std::shared_ptr<NodeAST> node);
+    std::shared_ptr<NodeAST> operation(std::shared_ptr<NodeAST>, IsEqOperator* op);
+    std::shared_ptr<NodeAST> operation(std::shared_ptr<NodeAST>, AndOperator* op);
+    std::shared_ptr<NodeAST> operation(std::shared_ptr<NodeAST>, OrOperator* op);
+    std::shared_ptr<NodeAST> operation(std::shared_ptr<NodeAST>, NotOperator* op);
 };
-
-struct MinusOperator : Operator
-{
-    std::shared_ptr<NodeAST> operation(std::shared_ptr<NodeAST> node);
-};
-
-struct MultOperator : Operator
-{
-    std::shared_ptr<NodeAST> operation(std::shared_ptr<NodeAST> node);
-};
-
-struct DivOperator : Operator
-{
-    std::shared_ptr<NodeAST> operation(std::shared_ptr<NodeAST> node);
-};
-
-struct PowerOperator : Operator
-{
-    std::shared_ptr<NodeAST> operation(std::shared_ptr<NodeAST> node);
-};
-
-struct IsEqOperator : Operator
-{
-    std::shared_ptr<NodeAST> operation(std::shared_ptr<NodeAST> node);
-};
-
-struct NotEqPlusOperator : Operator
-{
-    std::shared_ptr<NodeAST> operation(std::shared_ptr<NodeAST> node);
-};
-
-struct NotPlusOperator : Operator
-{
-    std::shared_ptr<NodeAST> operation(std::shared_ptr<NodeAST> node);
-};
-
-struct AndPlusOperator : Operator
-{
-    std::shared_ptr<NodeAST> operation(std::shared_ptr<NodeAST> node);
-};
-
-struct OrPlusOperator : Operator
-{
-    std::shared_ptr<NodeAST> operation(std::shared_ptr<NodeAST> node);
-};
-
-struct MoreOperator : Operator
-{
-    std::shared_ptr<NodeAST> operation(std::shared_ptr<NodeAST> node);
-};
-
-struct LessOperator : Operator
-{
-    std::shared_ptr<NodeAST> operation(std::shared_ptr<NodeAST> node);
-};
+struct Int : Type{};
+struct Float : Type{};
+struct String : Type{};
