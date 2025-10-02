@@ -1,8 +1,24 @@
 #include"../include/Operators.h"
 
+OperatorsManager::OperatorsManager(std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> _objects)
+{
+    objects = _objects;
+}
+
 Type* OperatorsManager::TokenTypeToType(std::shared_ptr<NodeAST> node)
 {
-    
+    TokenType left = node->left->token->type;
+    TokenType right = node->right->token->type;
+
+    unsigned char type; 
+    if(operators.count(left) || operators.count(right))
+    {
+        return new NotFullType;
+    }
+    else if(left == TokenType::VAR)
+    {
+        
+    }
 }
 
 void OperatorsManager::DoOperation(std::shared_ptr<NodeAST> node)

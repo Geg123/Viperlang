@@ -1,4 +1,9 @@
 #include"Objects.h"
+#include<unordered_map>
+#include<unordered_set>
+
+std::unordered_set<TokenType> operators{TokenType::PLUS, TokenType::MINUS, TokenType::MULT, TokenType::DIV, TokenType::MODULE, TokenType::AND, TokenType::OR, TokenType::IS_EQ, TokenType::NOT, TokenType::NOT_EQ};
+//for objects.h
 
 struct Operator
 {
@@ -14,14 +19,15 @@ struct Type
 struct OperatorsManager
 {
 private:
-    std::weak_ptr<std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>>> objects;
+    std::weak_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> objects;
     Operator* _operator;
     Type* type;
 public:
-    OperatorsManager(std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> _objects){}
+    OperatorsManager(std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> _objects);
     Type* TokenTypeToType(std::shared_ptr<NodeAST> node);//is used by DoOperation()
     Operator* NodeTypeToOperator(std::shared_ptr<NodeAST> node);
     void DoOperation(std::shared_ptr<NodeAST> node);
+    
 };
 
 struct EqOperator : Operator{};
@@ -37,8 +43,10 @@ struct AndOperator : Operator{};
 struct OrOperator : Operator{};
 struct GreaterOperator : Operator{};
 struct LessOperator : Operator{};
+struct SqBracketsOperator : Operator{};
 
 struct NotFullType : Type{};
+
 struct Bool : Type
 {
     std::shared_ptr<NodeAST> operation(std::shared_ptr<NodeAST>, IsEqOperator* op);

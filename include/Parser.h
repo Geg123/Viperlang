@@ -12,8 +12,8 @@ struct NodeAST
 
 struct Parser
 {
-	Parser(Lexer* _lexer);
 	Parser(){}
+	void ParserLexerInit(Lexer* _lexer);
 	std::shared_ptr<NodeAST> parseExpr(size_t iter, size_t end_iter);
 	std::shared_ptr<NodeAST> parseIF(size_t iter, size_t end_iter);
 	std::shared_ptr<NodeAST> parseArray(size_t iter, size_t end_iter);
@@ -23,5 +23,5 @@ struct Parser
 	void Analys();
 
 	std::vector<std::shared_ptr<NodeAST>> line_nodes;
-	Lexer* lexer = nullptr;
+	std::shared_ptr<Lexer> lexer;
 };

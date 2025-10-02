@@ -2,7 +2,10 @@
 
 NodeAST::NodeAST(std::shared_ptr<Token> _token) : token(_token) {}
 
-Parser::Parser(Lexer* _lexer): lexer(_lexer){}
+void Parser::ParserLexerInit(Lexer* _lexer)
+{
+	lexer = std::make_shared<Lexer>(_lexer);
+}
 
 std::shared_ptr<NodeAST> Parser::parseExpr(size_t iter, size_t end_iter)
 {

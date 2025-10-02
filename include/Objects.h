@@ -1,5 +1,4 @@
 #include"Parser.h"
-#include<unordered_map>
 
 enum class BasicVarType {INT, STRING, BOOL, FLOAT};
 
@@ -10,7 +9,6 @@ struct Object
     virtual ~Object(){}
     virtual void Create(std::shared_ptr<NodeAST> node);
     Object(std::string _name) : name(_name){}
-
     std::string name;
 };
 
@@ -29,7 +27,7 @@ struct Array : Object
     Array(std::string _name) : Object(_name){}
     void Create(std::shared_ptr<NodeAST> node);
 
-    std::vector<std::shared_ptr<Variable>> array;
+    std::vector<std::shared_ptr<Object>> array;
 };
 
 struct Function : Object
@@ -38,13 +36,4 @@ struct Function : Object
     void Create(std::shared_ptr<NodeAST> node);
 
     std::vector<std::shared_ptr<NodeAST>> definition_nodes;
-};
-
-struct ObjectManager
-{
-    void Create(std::shared_ptr<NodeAST> node, Object* obj_type);
-    void ExecuteVoidFunc(std::shared_ptr<NodeAST> node);
-
-    ObjectCreator ObjCreator;
-    std::unordered_map<std::string, std::shared_ptr<Object>> objects;
 };
