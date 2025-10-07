@@ -4,8 +4,8 @@ struct Creator
 {
     virtual ~Creator(){}
     Creator(std::shared_ptr<OperatorsManager> _op_manager) : op_manager(_op_manager){}
-    //virtual void CreateObject(std::shared_ptr<NodeAST> node){}
     virtual void CreateObject(std::shared_ptr<NodeAST> node, size_t node_iter){}
+protected:
     std::shared_ptr<OperatorsManager> op_manager;
     BasicVarType VarTypeSelector(std::shared_ptr<NodeAST> node);
     void InsertObject(std::shared_ptr<Object> obj);

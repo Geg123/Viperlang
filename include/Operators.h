@@ -27,7 +27,7 @@ struct LessOperator : Operator {};
 struct SqBracketsOperator : Operator {};
 
 using TypeOperations = std::variant<EqOperator, PlusOperator, MinusOperator, MultOperator,
-        DivOperator, PowerOperator,IsEqOperator, NotOperator, NotEqOperator, AndOperator, 
+        DivOperator, PowerOperator, IsEqOperator, NotOperator, NotEqOperator, AndOperator, 
         OrOperator, GreaterOperator, LessOperator, SqBracketsOperator>;
 
 struct Type
@@ -72,8 +72,82 @@ private:
         void operator()(AndOperator& op);
         void operator()(OrOperator& op);
         void operator()(NotEqOperator& op);
+        void operator()(SqBracketsOperator& op){std::cerr << "Error: you can't do this operation!\n"; system("pause");}
+        void operator()(NotOperator& op){std::cerr << "Error: you can't do this operation!\n"; system("pause");}
+        void operator()(MultOperator& op){std::cerr << "Error: you can't do this operation!\n"; system("pause");}
+        void operator()(PlusOperator& op){std::cerr << "Error: you can't do this operation!\n"; system("pause");}
+        void operator()(MinusOperator& op){std::cerr << "Error: you can't do this operation!\n"; system("pause");}
+        void operator()(DivOperator& op){std::cerr << "Error: you can't do this operation!\n"; system("pause");}
+        void operator()(PowerOperator& op){std::cerr << "Error: you can't do this operation!\n"; system("pause");}
+        void operator()(LessOperator& op){std::cerr << "Error: you can't do this operation!\n"; system("pause");}
+        void operator()(GreaterOperator& op){std::cerr << "Error: you can't do this operation!\n"; system("pause");}
     };
 };
-struct Int : Type{};
-struct Float : Type{};
-struct String : Type{};
+struct Int : Type
+{
+    void executeOperation(std::shared_ptr<NodeAST> node, TypeOperations op, std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> _objects);
+private:
+    struct Functor
+    {
+        void getVars();
+        std::shared_ptr<NodeAST> node;
+        std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> objects;
+        Functor(std::shared_ptr<NodeAST> _node, std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> _objects) : node(_node), objects(_objects){}
+        void operator()(EqOperator& op);
+        void operator()(PlusOperator& op);
+        void operator()(MinusOperator& op);
+        void operator()(MultOperator& op);
+        void operator()(DivOperator& op);
+        void operator()(PowerOperator& op);
+        void operator()(GreaterOperator& op);
+        void operator()(LessOperator& op);
+        void operator()(IsEqOperator& op);
+        void operator()(NotEqOperator& op);
+        void operator()(SqBracketsOperator& op){std::cerr << "Error: you can't do this operation!\n"; system("pause");}
+        void operator()(NotOperator& op){std::cerr << "Error: you can't do this operation!\n"; system("pause");}
+        void operator()(AndOperator& op){std::cerr << "Error: you can't do this operation!\n"; system("pause");}
+        void operator()(OrOperator& op){std::cerr << "Error: you can't do this operation!\n"; system("pause");}
+    };
+};
+struct Float : Type
+{
+    void executeOperation(std::shared_ptr<NodeAST> node, TypeOperations op, std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> _objects);
+private:
+    struct Functor
+    {
+        std::shared_ptr<NodeAST> node;
+        std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> objects;
+        Functor(std::shared_ptr<NodeAST> _node, std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> _objects) : node(_node), objects(_objects){}
+        void operator()(EqOperator& op);
+        void operator()(IsEqOperator& op);
+        void operator()(AndOperator& op);
+        void operator()(OrOperator& op);
+        void operator()(NotEqOperator& op);
+    };
+};
+struct String : Type
+{
+    void executeOperation(std::shared_ptr<NodeAST> node, TypeOperations op, std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> _objects);
+private:
+    struct Functor
+    {
+        void getVars();
+        std::shared_ptr<NodeAST> node;
+        std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> objects;
+        Functor(std::shared_ptr<NodeAST> _node, std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> _objects) : node(_node), objects(_objects){}
+        void operator()(EqOperator& op);
+        void operator()(IsEqOperator& op);
+        void operator()(NotEqOperator& op);
+        void operator()(PlusOperator& op);
+        void operator()(MultOperator& op);
+        void operator()(SqBracketsOperator& op){std::cerr << "Error: you can't do this operation!\n"; system("pause");}
+        void operator()(NotOperator& op){std::cerr << "Error: you can't do this operation!\n"; system("pause");}
+        void operator()(AndOperator& op){std::cerr << "Error: you can't do this operation!\n"; system("pause");}
+        void operator()(OrOperator& op){std::cerr << "Error: you can't do this operation!\n"; system("pause");}
+        void operator()(MinusOperator& op){std::cerr << "Error: you can't do this operation!\n"; system("pause");}
+        void operator()(DivOperator& op){std::cerr << "Error: you can't do this operation!\n"; system("pause");}
+        void operator()(PowerOperator& op){std::cerr << "Error: you can't do this operation!\n"; system("pause");}
+        void operator()(LessOperator& op){std::cerr << "Error: you can't do this operation!\n"; system("pause");}
+        void operator()(GreaterOperator& op){std::cerr << "Error: you can't do this operation!\n"; system("pause");}
+    };
+};

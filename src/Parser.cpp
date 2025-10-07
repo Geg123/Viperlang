@@ -18,39 +18,40 @@ std::shared_ptr<NodeAST> Parser::parseExpr(size_t iter, size_t end_iter)
 	bool and = false;
 	bool or = false;
 	bool input = false;
+	bool power = false;
 
 	for (size_t i = iter; i < end_iter; ++i)
 	{
-		std::string type = TokenTypeSwitch(lexer->tokens[i]->type);
+		TokenType type =lexer->tokens[i]->type;
 
-		if (type == "MULT")
+		if (type == TokenType::MULT)
 		{
 			nodes.push_back(std::make_shared<NodeAST>(lexer->tokens[i]));
 			mult = true;
 		}
-		else if (type == "DIV")
+		else if (type == TokenType::DIV)
 		{
 			nodes.push_back(std::make_shared<NodeAST>(lexer->tokens[i]));
 			mult = true;
 		}
-		else if (type == "MODULE")
+		else if (type == TokenType::MODULE)
 		{
 			nodes.push_back(std::make_shared<NodeAST>(lexer->tokens[i]));
 			mult = true;
 		}
-		else if (type == "INPUT")
+		else if (type == TokenType::INPUT)
 		{
 			nodes.push_back(std::make_shared<NodeAST>(lexer->tokens[i]));
 			int brackets_pares = 0;
 			size_t j = i + 2;
-			if (TokenTypeSwitch(lexer->tokens[i + 1]->type) == "LEFT_BRACKET") {
+			if (lexer->tokens[i + 1]->type == TokenType::LEFT_BRACKET) {
 				while (1)
 				{
-					if (TokenTypeSwitch(lexer->tokens[j]->type) == "LEFT_BRACKET")
+					if (lexer->tokens[j]->type == TokenType::LEFT_BRACKET)
 						++brackets_pares;
-					else if (TokenTypeSwitch(lexer->tokens[j]->type) == "RIGHT_BRACKET" && brackets_pares != 0)
+					else if (lexer->tokens[j]->type == TokenType::RIGHT_BRACKET && brackets_pares != 0)
 						--brackets_pares;
-					else if (TokenTypeSwitch(lexer->tokens[j]->type) == "RIGHT_BRACKET" && brackets_pares == 0)
+					else if (lexer->tokens[j]->type == TokenType::RIGHT_BRACKET && brackets_pares == 0)
 						break;
 					++j;
 				}
@@ -68,19 +69,19 @@ std::shared_ptr<NodeAST> Parser::parseExpr(size_t iter, size_t end_iter)
 				system("pause");
 			}
 		}
-		else if (type == "INT")
+		else if (type == TokenType::INT)
 		{
 			nodes.push_back(std::make_shared<NodeAST>(lexer->tokens[i]));
 			int brackets_pares = 0;
 			size_t j = i + 2;
-			if (TokenTypeSwitch(lexer->tokens[i + 1]->type) == "LEFT_BRACKET") {
+			if (lexer->tokens[i + 1]->type == TokenType::LEFT_BRACKET) {
 				while (1)
 				{
-					if (TokenTypeSwitch(lexer->tokens[j]->type) == "LEFT_BRACKET")
+					if (lexer->tokens[j]->type == TokenType::LEFT_BRACKET)
 						++brackets_pares;
-					else if (TokenTypeSwitch(lexer->tokens[j]->type) == "RIGHT_BRACKET" && brackets_pares != 0)
+					else if (lexer->tokens[j]->type == TokenType::RIGHT_BRACKET && brackets_pares != 0)
 						--brackets_pares;
-					else if (TokenTypeSwitch(lexer->tokens[j]->type) == "RIGHT_BRACKET" && brackets_pares == 0)
+					else if (lexer->tokens[j]->type == TokenType::RIGHT_BRACKET && brackets_pares == 0)
 						break;
 					++j;
 				}
@@ -98,7 +99,7 @@ std::shared_ptr<NodeAST> Parser::parseExpr(size_t iter, size_t end_iter)
 				system("pause");
 			}
 		}
-		else if (type == "VAR")
+		else if (type == TokenType::VAR)
 		{
 			if (lexer->tokens[i + 1]->type == TokenType::LEFT_BRACKET)
 			{
@@ -114,21 +115,21 @@ std::shared_ptr<NodeAST> Parser::parseExpr(size_t iter, size_t end_iter)
 				{
 					bool found_right = false;
 
-					for (size_t j = current; TokenTypeSwitch(lexer->tokens[j]->type) != "COMMA" && TokenTypeSwitch(lexer->tokens[j]->type) != "RIGHT_BRACKET"; ++j)
+					for (size_t j = current; lexer->tokens[j]->type != TokenType::COMMA && lexer->tokens[j]->type != TokenType::RIGHT_BRACKET; ++j)
 					{
-						if (TokenTypeSwitch(lexer->tokens[j]->type) == "NUMBER")
+						if (lexer->tokens[j]->type == TokenType::NUMBER)
 						{
 							found_right = true;
 						}
-						else if (TokenTypeSwitch(lexer->tokens[j]->type) == "STRING")
+						else if (lexer->tokens[j]->type == TokenType::STRING)
 						{
 							found_right = true;
 						}
-						else if (TokenTypeSwitch(lexer->tokens[j]->type) == "BOOL")
+						else if (lexer->tokens[j]->type == TokenType::BOOL)
 						{
 							found_right = true;
 						}
-						else if (TokenTypeSwitch(lexer->tokens[j]->type) == "VAR")
+						else if (lexer->tokens[j]->type == TokenType::VAR)
 						{
 							found_right = true;
 						}
@@ -144,7 +145,7 @@ std::shared_ptr<NodeAST> Parser::parseExpr(size_t iter, size_t end_iter)
 
 					current = ++curr_end;
 
-					if (TokenTypeSwitch(lexer->tokens[current - 1]->type) != "RIGHT_BRACKET")
+					if (lexer->tokens[current - 1]->type != TokenType::RIGHT_BRACKET)
 						tmp = tmp->right;
 					else
 					{
@@ -156,82 +157,87 @@ std::shared_ptr<NodeAST> Parser::parseExpr(size_t iter, size_t end_iter)
 			else
 				nodes.push_back(std::make_shared<NodeAST>(lexer->tokens[i]));
 		}
-		else if (type == "NUMBER")
+		else if (type == TokenType::NUMBER)
 			nodes.push_back(std::make_shared<NodeAST>(lexer->tokens[i]));
-		else if (type == "STRING")
+		else if (type == TokenType::STRING)
 			nodes.push_back(std::make_shared<NodeAST>(lexer->tokens[i]));
-		else if (type == "TRUE")
+		else if (type == TokenType::TRUE)
 			nodes.push_back(std::make_shared<NodeAST>(lexer->tokens[i]));
-		else if (type == "FALSE")
+		else if (type == TokenType::FALSE)
 			nodes.push_back(std::make_shared<NodeAST>(lexer->tokens[i]));
-		else if (type == "PLUS")
+		else if (type == TokenType::PLUS)
 		{
 			nodes.push_back(std::make_shared<NodeAST>(lexer->tokens[i]));
 			plus = true;
 		}
-		else if (type == "MINUS")
+		else if (type == TokenType::MINUS)
 		{
 			nodes.push_back(std::make_shared<NodeAST>(lexer->tokens[i]));
 			plus = true;
 		}
-		else if (type == "GREATER")
+		else if (type == TokenType::GREATER)
 		{
 			nodes.push_back(std::make_shared<NodeAST>(lexer->tokens[i]));
 			more = true;
 		}
-		else if (type == "LESS")
+		else if (type == TokenType::LESS)
 		{
 			nodes.push_back(std::make_shared<NodeAST>(lexer->tokens[i]));
 			more = true;
 		}
-		else if (type == "IS_EQ")
+		else if (type == TokenType::IS_EQ)
 		{
 			nodes.push_back(std::make_shared<NodeAST>(lexer->tokens[i]));
 			is_eq = true;
 		}
-		else if (type == "NOT_EQ")
+		else if (type == TokenType::NOT_EQ)
 		{
 			nodes.push_back(std::make_shared<NodeAST>(lexer->tokens[i]));
 			is_eq = true;
 		}
-		else if (type == "AND")
+		else if (type == TokenType::AND)
 		{
 			nodes.push_back(std::make_shared<NodeAST>(lexer->tokens[i]));
 			and = true;
 		}
-		else if (type == "OR")
+		else if (type == TokenType::OR)
 		{
 			nodes.push_back(std::make_shared<NodeAST>(lexer->tokens[i]));
 			or = true;
 		}
-		else if (type == "LEFT_BRACKET")
+		else if(type == TokenType::POWER)
+		{
+			nodes.push_back(std::make_shared<NodeAST>(lexer->tokens[i]));
+			power = true;
+		}
+		else if (type == TokenType::LEFT_BRACKET)
 		{
 			int brackets_pares = 0;
 			size_t j = i + 1;
 			while (1)
 			{
-				if (TokenTypeSwitch(lexer->tokens[j]->type) == "LEFT_BRACKET")
+				if (lexer->tokens[j]->type == TokenType::LEFT_BRACKET)
 					++brackets_pares;
-				else if (TokenTypeSwitch(lexer->tokens[j]->type) == "RIGHT_BRACKET" && brackets_pares != 0)
+				else if (lexer->tokens[j]->type == TokenType::RIGHT_BRACKET && brackets_pares != 0)
 					--brackets_pares;
-				else if (TokenTypeSwitch(lexer->tokens[j]->type) == "RIGHT_BRACKET" && brackets_pares == 0)
+				else if (lexer->tokens[j]->type == TokenType::RIGHT_BRACKET && brackets_pares == 0)
 					break;
 				++j;
 			}
 			nodes.push_back(parseExpr(i + 1, j));
 			i = j;
 		}
-		else if (type == "SQ_LEFT_BRACKET")
+		else if (type == TokenType::SQ_LEFT_BRACKET)
 		{
 			int brackets_pares = 0;
 			size_t j = i + 1;
 			while (1)
 			{
-				if (TokenTypeSwitch(lexer->tokens[j]->type) == "SQ_LEFT_BRACKET")
+				if (lexer->tokens[j]->type == TokenType::SQ_LEFT_BRACKET)
 					++brackets_pares;
-				else if (TokenTypeSwitch(lexer->tokens[j]->type) == "SQ_RIGHT_BRACKET" && brackets_pares != 0)
+				else if (lexer->tokens[j]->type == TokenType::SQ_RIGHT_BRACKET && brackets_pares != 0)
 					--brackets_pares;
-				else if (TokenTypeSwitch(lexer->tokens[j]->type) == "SQ_RIGHT_BRACKET" && brackets_pares == 0)
+				else if (lexer->tokens[j]->type == TokenType::SQ_RIGHT_BRACKET && brackets_pares == 0)
 					break;
 				++j;
 			}
@@ -240,13 +246,28 @@ std::shared_ptr<NodeAST> Parser::parseExpr(size_t iter, size_t end_iter)
 		}
 
 	}
-
+	if(power)
+	{
+		size_t i = nodes.size() - 1;
+		while (i >= 1 && i != 18446744073709551615)
+		{
+			if (nodes[i]->token->type == TokenType::POWER)
+			{
+				nodes[i]->right = nodes[i + 1];
+				nodes[i]->left = nodes[i - 1];
+				nodes.erase(nodes.begin() + i + 1);
+				nodes.erase(nodes.begin() + i - 1);
+				--i;
+			}
+			--i;
+		}
+	}
 	if (mult)
 	{
 		size_t i = nodes.size() - 1;
 		while (i >= 1 && i != 18446744073709551615)
 		{
-			if (TokenTypeSwitch(nodes[i]->token->type) == "MULT")
+			if (nodes[i]->token->type == TokenType::MULT)
 			{
 				nodes[i]->right = nodes[i + 1];
 				nodes[i]->left = nodes[i - 1];
@@ -254,7 +275,7 @@ std::shared_ptr<NodeAST> Parser::parseExpr(size_t iter, size_t end_iter)
 				nodes.erase(nodes.begin() + i - 1);
 				--i;
 			}
-			else if (TokenTypeSwitch(nodes[i]->token->type) == "DIV")
+			else if (nodes[i]->token->type == TokenType::DIV)
 			{
 				nodes[i]->right = nodes[i + 1];
 				nodes[i]->left = nodes[i - 1];
@@ -262,7 +283,7 @@ std::shared_ptr<NodeAST> Parser::parseExpr(size_t iter, size_t end_iter)
 				nodes.erase(nodes.begin() + i - 1);
 				--i;
 			}
-			else if (TokenTypeSwitch(nodes[i]->token->type) == "MODULE")
+			else if (nodes[i]->token->type == TokenType::MODULE)
 			{
 				nodes[i]->right = nodes[i + 1];
 				nodes[i]->left = nodes[i - 1];
@@ -278,7 +299,7 @@ std::shared_ptr<NodeAST> Parser::parseExpr(size_t iter, size_t end_iter)
 		size_t i = nodes.size() - 1;
 		while (i >= 1 && i != 18446744073709551615)
 		{
-			if (TokenTypeSwitch(nodes[i]->token->type) == "PLUS")
+			if (nodes[i]->token->type == TokenType::PLUS)
 			{
 				nodes[i]->right = nodes[i + 1];
 				nodes[i]->left = nodes[i - 1];
@@ -286,7 +307,7 @@ std::shared_ptr<NodeAST> Parser::parseExpr(size_t iter, size_t end_iter)
 				nodes.erase(nodes.begin() + i - 1);
 				--i;
 			}
-			else if (TokenTypeSwitch(nodes[i]->token->type) == "MINUS")
+			else if (nodes[i]->token->type == TokenType::MINUS)
 			{
 				nodes[i]->right = nodes[i + 1];
 				nodes[i]->left = nodes[i - 1];
@@ -302,7 +323,7 @@ std::shared_ptr<NodeAST> Parser::parseExpr(size_t iter, size_t end_iter)
 		size_t i = nodes.size() - 1;
 		while (i >= 1 && i != 18446744073709551615)
 		{
-			if (TokenTypeSwitch(nodes[i]->token->type) == "GREATER")
+			if (nodes[i]->token->type == TokenType::GREATER)
 			{
 				nodes[i]->right = nodes[i + 1];
 				nodes[i]->left = nodes[i - 1];
@@ -310,7 +331,7 @@ std::shared_ptr<NodeAST> Parser::parseExpr(size_t iter, size_t end_iter)
 				nodes.erase(nodes.begin() + i - 1);
 				--i;
 			}
-			else if (TokenTypeSwitch(nodes[i]->token->type) == "LESS")
+			else if (nodes[i]->token->type == TokenType::LESS)
 			{
 				nodes[i]->right = nodes[i + 1];
 				nodes[i]->left = nodes[i - 1];
@@ -326,7 +347,7 @@ std::shared_ptr<NodeAST> Parser::parseExpr(size_t iter, size_t end_iter)
 		size_t i = nodes.size() - 1;
 		while (i >= 1 && i != 18446744073709551615)
 		{
-			if (TokenTypeSwitch(nodes[i]->token->type) == "IS_EQ")
+			if (nodes[i]->token->type == TokenType::IS_EQ)
 			{
 				nodes[i]->right = nodes[i + 1];
 				nodes[i]->left = nodes[i - 1];
@@ -334,7 +355,7 @@ std::shared_ptr<NodeAST> Parser::parseExpr(size_t iter, size_t end_iter)
 				nodes.erase(nodes.begin() + i - 1);
 				--i;
 			}
-			else if (TokenTypeSwitch(nodes[i]->token->type) == "NOT_EQ")
+			else if (nodes[i]->token->type == TokenType::NOT_EQ)
 			{
 				nodes[i]->right = nodes[i + 1];
 				nodes[i]->left = nodes[i - 1];
@@ -350,7 +371,7 @@ std::shared_ptr<NodeAST> Parser::parseExpr(size_t iter, size_t end_iter)
 		size_t i = nodes.size() - 1;
 		while (i >= 1 && i != 18446744073709551615)
 		{
-			if (TokenTypeSwitch(nodes[i]->token->type) == "AND")
+			if (nodes[i]->token->type == TokenType::AND)
 			{
 				nodes[i]->right = nodes[i + 1];
 				nodes[i]->left = nodes[i - 1];
@@ -366,7 +387,7 @@ std::shared_ptr<NodeAST> Parser::parseExpr(size_t iter, size_t end_iter)
 		size_t i = nodes.size() - 1;
 		while (i >= 1 && i != 18446744073709551615)
 		{
-			if (TokenTypeSwitch(nodes[i]->token->type) == "OR")
+			if (nodes[i]->token->type == TokenType::OR)
 			{
 				nodes[i]->right = nodes[i + 1];
 				nodes[i]->left = nodes[i - 1];
@@ -799,16 +820,16 @@ void Parser::Analys()
 
 			int rbrackets_counter = 0;
 
-			while (TokenTypeSwitch(lexer->tokens[j]->type) != "END")
+			while (lexer->tokens[j]->type != TokenType::END)
 			{
-				std::string tmp = TokenTypeSwitch(lexer->tokens[j]->type);
-				if (tmp == "VAR" || tmp == "NUMBER" || tmp == "STRING" || tmp == "BOOL" || tmp == "TRUE" || tmp == "FALSE")
+				TokenType tmp = lexer->tokens[j]->type;
+				if (tmp == TokenType::VAR || tmp == TokenType::NUMBER || tmp == TokenType::STRING || tmp == TokenType::BOOL || tmp == TokenType::TRUE || tmp == TokenType::FALSE)
 					found = true;
-				else if (TokenTypeSwitch(lexer->tokens[j]->type) == "LEFT_BRACKET")
+				else if (lexer->tokens[j]->type == TokenType::LEFT_BRACKET)
 					++rbrackets_counter;
-				else if (TokenTypeSwitch(lexer->tokens[j]->type) == "RIGHT_BRACKET" && rbrackets_counter == 0)
+				else if (lexer->tokens[j]->type == TokenType::RIGHT_BRACKET && rbrackets_counter == 0)
 					found_right = true;
-				else if (TokenTypeSwitch(lexer->tokens[j]->type) == "RIGHT_BRACKET" && rbrackets_counter != 0)
+				else if (lexer->tokens[j]->type == TokenType::RIGHT_BRACKET && rbrackets_counter != 0)
 					--rbrackets_counter;
 				++j;
 			}

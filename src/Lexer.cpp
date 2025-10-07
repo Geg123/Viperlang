@@ -175,6 +175,13 @@ void Lexer::TokensSort()
 				tokens[i - 1]->type = TokenType::NOT_EQ;
 				--tokens_size;
 			}
+			else if (tokens[i]->type == TokenType::MULT && tokens[i - 1]->type == TokenType::MULT)
+			{
+				tokens.erase(tokens.begin() + i);
+				tokens[i - 1]->value = "**";
+				tokens[i - 1]->type = TokenType::POWER;
+				--tokens_size;
+			}
 		}
 		
 	}

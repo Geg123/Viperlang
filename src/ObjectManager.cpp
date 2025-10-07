@@ -1,5 +1,7 @@
 #include"../include/ObjectManager.h"
 
+std::unordered_set<TokenType> types{ TokenType::NUMBER, TokenType::STRING, TokenType::VAR, TokenType::INT, TokenType::INPUT };
+
 ObjectManager::ObjectManager()
 {
     ObjCreator = std::make_shared<ObjectCreator>(std::make_shared<std::unordered_map<std::string, std::shared_ptr<Object>>>(objects));
@@ -25,7 +27,7 @@ void ObjectManager::Create(std::shared_ptr<NodeAST> node, size_t iterator)
     {
         //ObjCreator->CreateObject(new FuncCreator(tmpOpMan), node, iterator);
     }
-    else if(operators.count(node->right->token->type))
+    else if(operators.count(node->right->token->type) || types.count(node->right->token->type))
     {
         ObjCreator->CreateObject(new VarCreator(tmpOpMan), node, iterator);
     }
