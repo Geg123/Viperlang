@@ -1,58 +1,78 @@
 #include"Objects.h"
 #include<unordered_map>
 #include<unordered_set>
-
-std::unordered_set<TokenType> operators{TokenType::PLUS, TokenType::MINUS, TokenType::MULT, TokenType::DIV, TokenType::MODULE, TokenType::AND, TokenType::OR, TokenType::IS_EQ, TokenType::NOT, TokenType::NOT_EQ};
+#include<variant>
 //for objects.h
+
+extern std::unordered_set<TokenType> operators;
 
 struct Operator
 {
     virtual ~Operator(){}
-    virtual std::shared_ptr<NodeAST> operation(std::shared_ptr<NodeAST> node);
 };
+
+struct EqOperator : Operator {};
+struct PlusOperator : Operator {};
+struct MinusOperator : Operator {};
+struct MultOperator : Operator {};
+struct DivOperator : Operator {};
+struct PowerOperator : Operator {};
+struct IsEqOperator : Operator {};
+struct NotEqOperator : Operator {};
+struct NotOperator : Operator {};
+struct AndOperator : Operator {};
+struct OrOperator : Operator {};
+struct GreaterOperator : Operator {};
+struct LessOperator : Operator {};
+struct SqBracketsOperator : Operator {};
+
+using TypeOperations = std::variant<EqOperator, PlusOperator, MinusOperator, MultOperator,
+        DivOperator, PowerOperator,IsEqOperator, NotOperator, NotEqOperator, AndOperator, 
+        OrOperator, GreaterOperator, LessOperator, SqBracketsOperator>;
 
 struct Type
 {
     ~Type(){}
+    virtual bool test(){return true;}
+    virtual void accept(std::shared_ptr<NodeAST> node, Operator* op){}
+    virtual void executeOperation(std::shared_ptr<NodeAST> node, TypeOperations op, std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> _objects){}
 };
 
 struct OperatorsManager
 {
 private:
-    std::weak_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> objects;
+    std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> objects;
     Operator* _operator;
     Type* type;
 public:
+    TypeOperations NodeTypeToOperator(std::shared_ptr<NodeAST> node);
+    void InsertObject(std::shared_ptr<Object> obj);
     OperatorsManager(std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> _objects);
     Type* TokenTypeToType(std::shared_ptr<NodeAST> node);//is used by DoOperation()
-    Operator* NodeTypeToOperator(std::shared_ptr<NodeAST> node);
     void DoOperation(std::shared_ptr<NodeAST> node);
-    
+
 };
 
-struct EqOperator : Operator{};
-struct PlusOperator : Operator{};
-struct MinusOperator : Operator{};
-struct MultOperator : Operator{};
-struct DivOperator : Operator{};
-struct PowerOperator : Operator{};
-struct IsEqOperator : Operator{};
-struct NotEqOperator : Operator{};
-struct NotOperator : Operator{};
-struct AndOperator : Operator{};
-struct OrOperator : Operator{};
-struct GreaterOperator : Operator{};
-struct LessOperator : Operator{};
-struct SqBracketsOperator : Operator{};
-
-struct NotFullType : Type{};
+struct NotFullType : Type
+{
+    bool test() override {return false;} 
+};
 
 struct Bool : Type
 {
-    std::shared_ptr<NodeAST> operation(std::shared_ptr<NodeAST>, IsEqOperator* op);
-    std::shared_ptr<NodeAST> operation(std::shared_ptr<NodeAST>, AndOperator* op);
-    std::shared_ptr<NodeAST> operation(std::shared_ptr<NodeAST>, OrOperator* op);
-    std::shared_ptr<NodeAST> operation(std::shared_ptr<NodeAST>, NotOperator* op);
+    void executeOperation(std::shared_ptr<NodeAST> node, TypeOperations op, std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> _objects);
+private:
+    struct Functor
+    {
+        std::shared_ptr<NodeAST> node;
+        std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> objects;
+        Functor(std::shared_ptr<NodeAST> _node, std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> _objects) : node(_node), objects(_objects){}
+        void operator()(EqOperator& op);
+        void operator()(IsEqOperator& op);
+        void operator()(AndOperator& op);
+        void operator()(OrOperator& op);
+        void operator()(NotEqOperator& op);
+    };
 };
 struct Int : Type{};
 struct Float : Type{};

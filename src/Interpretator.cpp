@@ -1,4 +1,4 @@
-#include"Interpretator.h"
+#include"../include/Interpretator.h"
 #include<fstream>
 
 
@@ -43,12 +43,13 @@ void Interpretator::runtime()
 		}
 		else if(type == TokenType::PRINT)
 		{
-			
+			std::cout << objManager.CalcExpr(parser.line_nodes[i]->right)->token->value << "\n";
 		}
 	}
+	system("pause");
 }
 
-/*void Interpretator::runtime(size_t iter, size_t end_iter)*/
+/*void Interpretator::runtime(size_t iter, size_t end_iter)
 {
 
 	for (; iter < end_iter; ++iter)
@@ -131,4 +132,4 @@ void Interpretator::print(std::shared_ptr<NodeAST> node)
 	std::cout << node->right->token->value << "\n";
 	return;
 
-}
+}*/

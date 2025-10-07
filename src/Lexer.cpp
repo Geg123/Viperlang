@@ -5,7 +5,7 @@
 
 bool tab = false;
 
-/*std::string TokenTypeSwitch(TokenType type)
+std::string TokenTypeSwitch(TokenType type)
 {
 	int int_type = static_cast<int>(type);
 	switch (int_type)
@@ -150,7 +150,6 @@ TokenType StringToTokenType(std::string type)
 	else if (type == "RANGE")
 		return TokenType::RANGE;
 }
-*/
 
 Lexer::Lexer(std::string _line) : line(_line) {}
 Lexer::Lexer(){}
@@ -244,9 +243,9 @@ void Lexer::parseVar()
 		tokens.push_back(std::make_shared<Token>(TokenType::PRINT, var));
 	else if (var == "input")
 		tokens.push_back(std::make_shared<Token>(TokenType::INPUT, var));
-	else if (var == "true")
+	else if (var == "True")
 		tokens.push_back(std::make_shared<Token>(TokenType::TRUE, var));
-	else if (var == "false")
+	else if (var == "False")
 		tokens.push_back(std::make_shared<Token>(TokenType::FALSE, var));
 	else if (var == "and")
 		tokens.push_back(std::make_shared<Token>(TokenType::AND, var));

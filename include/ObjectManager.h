@@ -5,10 +5,10 @@ struct ObjectManager
 public:
     ObjectManager();
     void Create(std::shared_ptr<NodeAST> node, size_t iterator);
-    void CalcExpr(std::shared_ptr<NodeAST> node);
-    void ExecuteVoidFunc(std::shared_ptr<NodeAST> node);
+    std::shared_ptr<NodeAST> CalcExpr(std::shared_ptr<NodeAST> node);
+    void ExecuteVoidFunc(std::shared_ptr<NodeAST> node){}
 private:
-    void ExecuteFunc(std::shared_ptr<Function> func);
-    std::unordered_map<std::string, std::shared_ptr<Object>> objects;
+    void ExecuteFunc(std::shared_ptr<Function> func){}
     std::shared_ptr<ObjectCreator> ObjCreator;
+    std::unordered_map<std::string, std::shared_ptr<Object>> objects;
 };

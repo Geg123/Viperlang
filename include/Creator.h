@@ -8,11 +8,12 @@ struct Creator
     virtual void CreateObject(std::shared_ptr<NodeAST> node, size_t node_iter){}
     std::shared_ptr<OperatorsManager> op_manager;
     BasicVarType VarTypeSelector(std::shared_ptr<NodeAST> node);
+    void InsertObject(std::shared_ptr<Object> obj);
 };
 
 struct ObjectCreator
 {
-    std::weak_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> objects;
+    std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> objects;
     ObjectCreator(std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> map) : objects(map){}
     void CreateObject(Creator* creator, std::shared_ptr<NodeAST> node, size_t node_iter);
 };
@@ -22,7 +23,7 @@ struct VarCreator : Creator
     VarCreator(std::shared_ptr<OperatorsManager> _op_manager) : Creator(_op_manager){}
     void CreateObject(std::shared_ptr<NodeAST> node, size_t node_iter) override;
 };
-struct ArrayCreator : Creator
+/*struct ArrayCreator : Creator
 {
     ArrayCreator(std::shared_ptr<OperatorsManager> _op_manager) : Creator(_op_manager){}
     void CreateObject(std::shared_ptr<NodeAST> node, size_t node_iter) override;
@@ -31,4 +32,4 @@ struct FuncCreator : Creator
 {
     FuncCreator(std::shared_ptr<OperatorsManager> _op_manager) : Creator(_op_manager){}
     void CreateObject(std::shared_ptr<NodeAST> node, size_t node_iter) override;
-};
+};*/

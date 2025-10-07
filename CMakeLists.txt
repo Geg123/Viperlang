@@ -5,8 +5,9 @@ project(Viper-interpretator)
 add_executable(Interpretator
 	src/main.cpp
 	src/Lexer.cpp
-	src/AST.cpp
-	src/Var.cpp
-	src/Array.cpp
+	src/Parser.cpp
+	src/Operators.cpp
+	src/Creator.cpp
+	src/ObjectManager.cpp
 	src/Interpretator.cpp
 )

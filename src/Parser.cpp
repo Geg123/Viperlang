@@ -4,7 +4,7 @@ NodeAST::NodeAST(std::shared_ptr<Token> _token) : token(_token) {}
 
 void Parser::ParserLexerInit(Lexer* _lexer)
 {
-	lexer = std::make_shared<Lexer>(_lexer);
+	lexer = std::make_shared<Lexer>(*_lexer);
 }
 
 std::shared_ptr<NodeAST> Parser::parseExpr(size_t iter, size_t end_iter)
@@ -100,9 +100,9 @@ std::shared_ptr<NodeAST> Parser::parseExpr(size_t iter, size_t end_iter)
 		}
 		else if (type == "VAR")
 		{
-			if (TokenTypeSwitch(lexer->tokens[i + 1]->type) == "LEFT_BRACKET")
+			if (lexer->tokens[i + 1]->type == TokenType::LEFT_BRACKET)
 			{
-				lexer->tokens[i]->type = StringToTokenType("FUNCTION");
+				lexer->tokens[i]->type = TokenType::FUNCTION;
 				nodes.push_back(std::make_shared<NodeAST>(lexer->tokens[i]));
 
 				size_t current = i;
