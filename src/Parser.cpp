@@ -590,20 +590,20 @@ void Parser::Analys()
 		{
 			if (tabs < func_tab_q)
 			{
-				root = std::make_shared<NodeAST>(std::make_shared<Token>(StringToTokenType("FUNC_END"), ""));
+				root = std::make_shared<NodeAST>(std::make_shared<Token>(TokenType::FUNC_END, ""));
 				--func_tab_q;
 				line_nodes.push_back(root);
 			}
 			if ((tabs - func_tab_q - cycle_tab_q) < if_tab_q)
 			{
-				root = std::make_shared<NodeAST>(std::make_shared<Token>(StringToTokenType("IF_END"), ""));
+				root = std::make_shared<NodeAST>(std::make_shared<Token>(TokenType::IF_END, ""));
 				//root->token->type = StringToTokenType("IF_END");
 				--if_tab_q;
 				line_nodes.push_back(root);
 			}
 			if ((tabs - func_tab_q - if_tab_q) < cycle_tab_q)
 			{
-				root = std::make_shared<NodeAST>(std::make_shared<Token>(StringToTokenType("FOR_END"), ""));
+				root = std::make_shared<NodeAST>(std::make_shared<Token>(TokenType::FOR_END, ""));
 				//root->token->type = StringToTokenType("IF_END");
 				--cycle_tab_q;
 				--tokens_size;
@@ -729,20 +729,21 @@ void Parser::Analys()
 		}
 		else if (type == "LEFT_BRACKET")
 		{
-			if (TokenTypeSwitch(lexer->tokens[i - 1]->type) == "VAR")
+			if (lexer->tokens[i - 1]->type == TokenType::VAR)
 			{
 				size_t name = i - 1;
 
 				size_t j = ++i;
-				while(TokenTypeSwitch(lexer->tokens[i]->type) != "COLON" && TokenTypeSwitch(lexer->tokens[i]->type) != "END")
+				while(lexer->tokens[i]->type != TokenType::COLON && lexer->tokens[i]->type != TokenType::END)
 				{
 					++i;
 				}
-				if (TokenTypeSwitch(lexer->tokens[i]->type) == "COLON")
+				if (lexer->tokens[i]->type == TokenType::COLON)
 				{
-					root = std::make_shared<NodeAST>(std::make_shared<Token>(StringToTokenType("FUNC_INIT"), lexer->tokens[name]->value));
+					//root = std::make_shared<NodeAST>(std::make_shared<Token>(TokenType::FUNC_INIT, lexer->tokens[name]->value));
 					root = parseFuncInit(j, i - 1);
-					root->token->type = StringToTokenType("FUNC_INIT");
+					root->token->value = lexer->tokens[name]->value;
+					root->token->type = TokenType::FUNC_INIT;
 					line_nodes.push_back(root);
 					++func_tab_q;
 					++i;
@@ -760,7 +761,7 @@ void Parser::Analys()
 		{
 			root = std::make_shared<NodeAST>(lexer->tokens[i]);
 			size_t j = i + 1;
-			for (; TokenTypeSwitch(lexer->tokens[j]->type) != "COLON"; ++j);
+			for (;lexer->tokens[j]->type != TokenType::COLON; ++j);
 			root->right = parseExpr(i + 1, j);
 			line_nodes.push_back(root);
 			++if_tab_q;
@@ -770,7 +771,7 @@ void Parser::Analys()
 		{
 			root = std::make_shared<NodeAST>(lexer->tokens[i]);
 			size_t j = i + 1;
-			for (; TokenTypeSwitch(lexer->tokens[j]->type) != "COLON"; ++j);
+			for (; lexer->tokens[j]->type != TokenType::COLON; ++j);
 			root = parseFor(i + 1, j);
 			line_nodes.push_back(root);
 			++cycle_tab_q;

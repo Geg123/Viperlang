@@ -37,7 +37,7 @@ void OperatorsManager::InsertObject(std::shared_ptr<Object> obj)
 {
     objects->insert({obj->name, obj});
 }
-
+   
 Type* OperatorsManager::TokenTypeToType(std::shared_ptr<NodeAST> node)
 {
     TokenType left;

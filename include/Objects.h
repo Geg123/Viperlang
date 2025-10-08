@@ -35,5 +35,7 @@ struct Function : Object
     Function(std::string _name) : Object(_name){}
     void Create(std::shared_ptr<NodeAST> node);
 
+    std::unordered_set<std::string> def_vars;
+    std::unordered_map<std::string, Object> vars;
     std::vector<std::shared_ptr<NodeAST>> definition_nodes;
 };

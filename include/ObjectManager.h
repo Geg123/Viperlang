@@ -4,7 +4,7 @@ struct ObjectManager
 {
 public:
     ObjectManager();
-    void Create(std::shared_ptr<NodeAST> node, size_t iterator);
+    void Create(std::shared_ptr<NodeAST> node, size_t iterator, std::shared_ptr<std::vector<std::shared_ptr<NodeAST>>> line_nodes);
     std::shared_ptr<NodeAST> CalcExpr(std::shared_ptr<NodeAST> node);
     void ExecuteVoidFunc(std::shared_ptr<NodeAST> node){}
 private:

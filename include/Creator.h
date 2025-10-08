@@ -4,7 +4,7 @@ struct Creator
 {
     virtual ~Creator(){}
     Creator(std::shared_ptr<OperatorsManager> _op_manager) : op_manager(_op_manager){}
-    virtual void CreateObject(std::shared_ptr<NodeAST> node, size_t node_iter){}
+    virtual void CreateObject(std::shared_ptr<NodeAST> node, size_t node_iter, std::shared_ptr<std::vector<std::shared_ptr<NodeAST>>> line_nodes){}
 protected:
     std::shared_ptr<OperatorsManager> op_manager;
     BasicVarType VarTypeSelector(std::shared_ptr<NodeAST> node);
@@ -15,21 +15,21 @@ struct ObjectCreator
 {
     std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> objects;
     ObjectCreator(std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> map) : objects(map){}
-    void CreateObject(Creator* creator, std::shared_ptr<NodeAST> node, size_t node_iter);
+    void CreateObject(Creator* creator, std::shared_ptr<NodeAST> node, size_t node_iter, std::shared_ptr<std::vector<std::shared_ptr<NodeAST>>> line_nodes);
 };
 
 struct VarCreator : Creator
 {
     VarCreator(std::shared_ptr<OperatorsManager> _op_manager) : Creator(_op_manager){}
-    void CreateObject(std::shared_ptr<NodeAST> node, size_t node_iter) override;
+    void CreateObject(std::shared_ptr<NodeAST> node, size_t node_iter, std::shared_ptr<std::vector<std::shared_ptr<NodeAST>>> line_nodes) override;
 };
 /*struct ArrayCreator : Creator
 {
     ArrayCreator(std::shared_ptr<OperatorsManager> _op_manager) : Creator(_op_manager){}
     void CreateObject(std::shared_ptr<NodeAST> node, size_t node_iter) override;
-};
+};*/
 struct FuncCreator : Creator
 {
     FuncCreator(std::shared_ptr<OperatorsManager> _op_manager) : Creator(_op_manager){}
-    void CreateObject(std::shared_ptr<NodeAST> node, size_t node_iter) override;
-};*/
+    void CreateObject(std::shared_ptr<NodeAST> node, size_t node_iter, std::shared_ptr<std::vector<std::shared_ptr<NodeAST>>> line_nodes) override;
+};

@@ -35,7 +35,7 @@ void Interpretator::runtime()
 		TokenType type = parser.line_nodes[i]->token->type;
 		if(type == TokenType::EQ || type == TokenType::FUNC_INIT)
 		{
-			objManager.Create(parser.line_nodes[i], i);
+			objManager.Create(parser.line_nodes[i], i, std::make_shared<std::vector>(parser.line_nodes[i]));
 		}
 		else if(type == TokenType::FUNCTION)
 		{
