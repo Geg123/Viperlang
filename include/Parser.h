@@ -3,6 +3,7 @@
 
 struct NodeAST
 {
+	NodeAST(){}
 	NodeAST(std::shared_ptr<Token> _token);
 
 	std::shared_ptr<Token> token = nullptr;

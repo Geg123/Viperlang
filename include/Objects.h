@@ -39,3 +39,8 @@ struct Function : Object
     std::unordered_map<std::string, Object> vars;
     std::vector<std::shared_ptr<NodeAST>> definition_nodes;
 };
+
+void ExecuteFunc(std::shared_ptr<Function> func)
+{
+
+}
