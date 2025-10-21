@@ -1,4 +1,7 @@
 #include"Parser.h"
+#include<unordered_map>
+#include<unordered_set>
+#include<variant>
 
 enum class BasicVarType {BOOL, INT, FLOAT, STRING, CUSTOM};
 
@@ -17,7 +20,6 @@ struct Variable : Object
     Variable(std::string _name) : Object(_name){}
     Variable(std::string _name, std::string _value) : Object(_name), value(_value){}
     Variable(std::string _name, std::string _value, BasicVarType _type) : Object(_name), value(_value), type(_type){}
-    void Create(std::shared_ptr<NodeAST> node){}
     std::string value;
     BasicVarType type;
 };
@@ -25,22 +27,13 @@ struct Variable : Object
 struct Array : Object
 {
     Array(std::string _name) : Object(_name){}
-    void Create(std::shared_ptr<NodeAST> node);
-
     std::vector<std::shared_ptr<Object>> array;
 };
 
 struct Function : Object
 {
     Function(std::string _name) : Object(_name){}
-    void Create(std::shared_ptr<NodeAST> node);
-
     std::unordered_set<std::string> def_vars;
     std::unordered_map<std::string, Object> vars;
-    std::vector<std::shared_ptr<NodeAST>> definition_nodes;
+    std::vector<NodeAST> definition_nodes;
 };
-
-void ExecuteFunc(std::shared_ptr<Function> func)
-{
-
-}

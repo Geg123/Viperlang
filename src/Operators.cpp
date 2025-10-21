@@ -1,11 +1,7 @@
 #include"../include/Operators.h"
 #include<cmath>
-std::unordered_set<TokenType> operators{ TokenType::PLUS, TokenType::MINUS, TokenType::MULT, TokenType::DIV, TokenType::MODULE, TokenType::AND, TokenType::OR, TokenType::IS_EQ, TokenType::NOT, TokenType::NOT_EQ, TokenType::POWER};
 
-OperatorsManager::OperatorsManager(std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> _objects)
-{
-    objects = _objects;
-}
+std::unordered_set<TokenType> operators{ TokenType::PLUS, TokenType::MINUS, TokenType::MULT, TokenType::DIV, TokenType::MODULE, TokenType::AND, TokenType::OR, TokenType::IS_EQ, TokenType::NOT, TokenType::NOT_EQ, TokenType::POWER};
 
 Type* TokenTypeToTypeSwitcher(TokenType left, TokenType right)
 {
@@ -32,11 +28,6 @@ TokenType BasicVarTypeToType(BasicVarType type)
     else if(type == BasicVarType::BOOL)
 	    return TokenType::STRING;
 }
-
-void OperatorsManager::InsertObject(std::shared_ptr<Object> obj)
-{
-    objects->insert({obj->name, obj});
-}
    
 Type* OperatorsManager::TokenTypeToType(std::shared_ptr<NodeAST> node)
 {
@@ -47,7 +38,7 @@ Type* OperatorsManager::TokenTypeToType(std::shared_ptr<NodeAST> node)
     {
         if(node->token->type == TokenType::VAR)
         {
-            return TokenTypeToTypeSwitcher(BasicVarTypeToType(dynamic_cast<Variable*>(objects->at(node->token->value).get())->type), TokenType::AND);
+            return TokenTypeToTypeSwitcher(BasicVarTypeToType(dynamic_cast<Variable*>(obj_manager->getObject(node->token->value).get())->type), TokenType::AND);
         }
         TokenType type = node->token->type;
         return TokenTypeToTypeSwitcher(type, TokenType::AND);
@@ -67,12 +58,12 @@ Type* OperatorsManager::TokenTypeToType(std::shared_ptr<NodeAST> node)
     if(left == TokenType::VAR)
     {
         std::string tmp_var_name = node->left->token->value;
-        if(objects->count(tmp_var_name))
+        if(obj_manager->getObject(tmp_var_name) != nullptr)
         {
             BasicVarType tmp_var_type;
             try
             {
-                tmp_var_type = dynamic_cast<Variable*>(objects->at(tmp_var_name).get())->type;
+                tmp_var_type = dynamic_cast<Variable*>(obj_manager->getObject(tmp_var_name).get())->type;
             }
             catch(...)
             {
@@ -90,12 +81,12 @@ Type* OperatorsManager::TokenTypeToType(std::shared_ptr<NodeAST> node)
     if(right == TokenType::VAR)
     {
         std::string tmp_var_name = node->right->token->value;
-        if(objects->count(tmp_var_name))
+        if(obj_manager->getObject(tmp_var_name) != nullptr)
         {
             BasicVarType tmp_var_type;
             try
             {
-                tmp_var_type = dynamic_cast<Variable*>(objects->at(tmp_var_name).get())->type;
+                tmp_var_type = dynamic_cast<Variable*>(obj_manager->getObject(tmp_var_name).get())->type;
             }
             catch(...)
             {
@@ -123,7 +114,7 @@ void OperatorsManager::DoOperation(std::shared_ptr<NodeAST> node)
     }
     type = TokenTypeToType(node);
     TypeOperations op = NodeTypeToOperator(node);
-    type->executeOperation(node, op, objects);
+    type->executeOperation(node, op);
     delete type;
 }
 
@@ -150,9 +141,11 @@ TypeOperations OperatorsManager::NodeTypeToOperator(std::shared_ptr<NodeAST> nod
     return EqOperator{};
 }
 
-void Bool::executeOperation(std::shared_ptr<NodeAST> node, TypeOperations op, std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> _objects)
+
+
+void Bool::executeOperation(std::shared_ptr<NodeAST> node, TypeOperations op)
 {
-    std::visit(Functor(node, _objects), op);
+    std::visit(Functor(node), op);
 }
 
 void Bool::Functor::operator()(IsEqOperator& op)
@@ -218,27 +211,27 @@ void Bool::Functor::operator()(EqOperator& op)
 {
     if(node->token->type == TokenType::VAR)
     {
-        node->token->value = dynamic_cast<Variable*>(objects->at(node->token->value).get())->value;
+        node->token->value = dynamic_cast<Variable*>(obj_manager->(node->token->value).get())->value;
     }
     node->token->type = TokenType::BOOL;
 }
 
-void Int::executeOperation(std::shared_ptr<NodeAST> node, TypeOperations op, std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> _objects)
+void Int::executeOperation(std::shared_ptr<NodeAST> node, TypeOperations op)
 {
-    std::visit(Functor(node, _objects), op);
+    std::visit(Functor(node), op);
 }
 
 void Int::Functor::getVars()
 {
     if (node->left->token->type == TokenType::VAR)
     {
-        node->left->token->type = BasicVarTypeToType(dynamic_cast<Variable*>(objects->at(node->left->token->value).get())->type);
-        node->left->token->value = dynamic_cast<Variable*>(objects->at(node->left->token->value).get())->value;
+        node->left->token->type = BasicVarTypeToType(dynamic_cast<Variable*>(obj_manager->getObject(node->left->token->value).get())->type);
+        node->left->token->value = dynamic_cast<Variable*>(obj_manager->getObject(node->left->token->value).get())->value;
     }
     if (node->right->token->type == TokenType::VAR)
     {
-        node->right->token->type = BasicVarTypeToType(dynamic_cast<Variable*>(objects->at(node->right->token->value).get())->type);
-        node->right->token->value = dynamic_cast<Variable*>(objects->at(node->right->token->value).get())->value;
+        node->right->token->type = BasicVarTypeToType(dynamic_cast<Variable*>(obj_manager->getObject(node->right->token->value).get())->type);
+        node->right->token->value = dynamic_cast<Variable*>(obj_manager->getObject(node->right->token->value).get())->value;
     }
 }
 
@@ -342,27 +335,27 @@ void Int::Functor::operator()(EqOperator& op)
 {
     if(node->token->type == TokenType::VAR)
     {
-        node->token->value = dynamic_cast<Variable*>(objects->at(node->token->value).get())->value;
+        node->token->value = dynamic_cast<Variable*>(obj_manager->getObject(node->token->value).get())->value;
     }
     node->token->type = TokenType::INT;
 }
 
-void String::executeOperation(std::shared_ptr<NodeAST> node, TypeOperations op, std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> _objects)
+void String::executeOperation(std::shared_ptr<NodeAST> node, TypeOperations op)
 {
-    std::visit(Functor(node, _objects), op);
+    std::visit(Functor(node), op);
 }
 
 void String::Functor::getVars()
 {
     if (node->left->token->type == TokenType::VAR)
     {
-        node->left->token->type = BasicVarTypeToType(dynamic_cast<Variable*>(objects->at(node->left->token->value).get())->type);
-        node->left->token->value = dynamic_cast<Variable*>(objects->at(node->left->token->value).get())->value;
+        node->left->token->type = BasicVarTypeToType(dynamic_cast<Variable*>(obj_manager->getObject(node->left->token->value).get())->type);
+        node->left->token->value = dynamic_cast<Variable*>(obj_manager->getObject(node->left->token->value).get())->value;
     }
     if (node->right->token->type == TokenType::VAR)
     {
-        node->right->token->type = BasicVarTypeToType(dynamic_cast<Variable*>(objects->at(node->right->token->value).get())->type);
-        node->right->token->value = dynamic_cast<Variable*>(objects->at(node->right->token->value).get())->value;
+        node->right->token->type = BasicVarTypeToType(dynamic_cast<Variable*>(obj_manager->getObject(node->right->token->value).get())->type);
+        node->right->token->value = dynamic_cast<Variable*>(obj_manager->getObject(node->right->token->value).get())->value;
     }
 }
 
@@ -370,7 +363,7 @@ void String::Functor::operator()(EqOperator& op)
 {
     if(node->token->type == TokenType::VAR)
     {
-        node->token->value = dynamic_cast<Variable*>(objects->at(node->token->value).get())->value;
+        node->token->value = dynamic_cast<Variable*>(obj_manager->getObject(node->token->value).get())->value;
     }
     node->token->type = TokenType::STRING;
 }

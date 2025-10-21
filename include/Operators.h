@@ -1,8 +1,4 @@
-#include"Objects.h"
-#include<unordered_map>
-#include<unordered_set>
-#include<variant>
-//for objects.h
+#include"ObjectManager.h"
 
 extern std::unordered_set<TokenType> operators;
 
@@ -35,22 +31,19 @@ struct Type
     ~Type(){}
     virtual bool test(){return true;}
     virtual void accept(std::shared_ptr<NodeAST> node, Operator* op){}
-    virtual void executeOperation(std::shared_ptr<NodeAST> node, TypeOperations op, std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> _objects){}
+    virtual void executeOperation(std::shared_ptr<NodeAST> node, TypeOperations op){}
 };
 
 struct OperatorsManager
 {
 private:
-    std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> objects;
     Operator* _operator;
     Type* type;
+    ObjectManager* obj_manager = ObjectManager::getInstance();
 public:
     TypeOperations NodeTypeToOperator(std::shared_ptr<NodeAST> node);
-    void InsertObject(std::shared_ptr<Object> obj);
-    OperatorsManager(std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> _objects);
     Type* TokenTypeToType(std::shared_ptr<NodeAST> node);//is used by DoOperation()
     void DoOperation(std::shared_ptr<NodeAST> node);
-
 };
 
 struct NotFullType : Type
@@ -60,13 +53,13 @@ struct NotFullType : Type
 
 struct Bool : Type
 {
-    void executeOperation(std::shared_ptr<NodeAST> node, TypeOperations op, std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> _objects);
+    void executeOperation(std::shared_ptr<NodeAST> node, TypeOperations op);
 private:
     struct Functor
     {
+        ObjectManager* obj_manager;
         std::shared_ptr<NodeAST> node;
-        std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> objects;
-        Functor(std::shared_ptr<NodeAST> _node, std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> _objects) : node(_node), objects(_objects){}
+        Functor(std::shared_ptr<NodeAST> _node) : node(_node){obj_manager = ObjectManager::getInstance();}
         void operator()(EqOperator& op);
         void operator()(IsEqOperator& op);
         void operator()(AndOperator& op);
@@ -85,14 +78,14 @@ private:
 };
 struct Int : Type
 {
-    void executeOperation(std::shared_ptr<NodeAST> node, TypeOperations op, std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> _objects);
+    void executeOperation(std::shared_ptr<NodeAST> node, TypeOperations op);
 private:
     struct Functor
     {
+        ObjectManager* obj_manager;
         void getVars();
         std::shared_ptr<NodeAST> node;
-        std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> objects;
-        Functor(std::shared_ptr<NodeAST> _node, std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> _objects) : node(_node), objects(_objects){}
+        Functor(std::shared_ptr<NodeAST> _node) : node(_node){obj_manager = ObjectManager::getInstance();}
         void operator()(EqOperator& op);
         void operator()(PlusOperator& op);
         void operator()(MinusOperator& op);
@@ -111,13 +104,13 @@ private:
 };
 struct Float : Type
 {
-    void executeOperation(std::shared_ptr<NodeAST> node, TypeOperations op, std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> _objects);
+    void executeOperation(std::shared_ptr<NodeAST> node, TypeOperations op);
 private:
     struct Functor
     {
+        ObjectManager* obj_manager;
         std::shared_ptr<NodeAST> node;
-        std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> objects;
-        Functor(std::shared_ptr<NodeAST> _node, std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> _objects) : node(_node), objects(_objects){}
+        Functor(std::shared_ptr<NodeAST> _node) : node(_node){obj_manager = ObjectManager::getInstance();}
         void operator()(EqOperator& op);
         void operator()(IsEqOperator& op);
         void operator()(AndOperator& op);
@@ -127,14 +120,14 @@ private:
 };
 struct String : Type
 {
-    void executeOperation(std::shared_ptr<NodeAST> node, TypeOperations op, std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> _objects);
+    void executeOperation(std::shared_ptr<NodeAST> node, TypeOperations op);
 private:
     struct Functor
     {
+        ObjectManager* obj_manager;
         void getVars();
         std::shared_ptr<NodeAST> node;
-        std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> objects;
-        Functor(std::shared_ptr<NodeAST> _node, std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<Object>>> _objects) : node(_node), objects(_objects){}
+        Functor(std::shared_ptr<NodeAST> _node) : node(_node){obj_manager = ObjectManager::getInstance();}
         void operator()(EqOperator& op);
         void operator()(IsEqOperator& op);
         void operator()(NotEqOperator& op);

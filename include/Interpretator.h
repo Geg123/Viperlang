@@ -1,13 +1,13 @@
-#include"ObjectManager.h"
+#include"Creator.h"
 
-struct Interpretator
+class Interpretator
 {
+public:
     Interpretator(std::string path);
+private:
     void runtime();
-    std::shared_ptr<NodeAST> runtime_func(size_t iter, size_t end_iter, std::shared_ptr<Function> function, bool f);
-    void print();
-
+    std::shared_ptr<NodeAST> CalcExpr(std::shared_ptr<NodeAST> node);
     Lexer main;
     Parser parser;
-    ObjectManager objManager;
+    ObjectManager* objManager;
 };

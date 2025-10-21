@@ -22,8 +22,16 @@ Interpretator::Interpretator(std::string path)
 	file.close();
 	parser.ParserLexerInit(&main);
 	parser.Analys();
+	objManager = ObjectManager::getInstance();
 	runtime();
 	system("pause");
+}
+
+std::shared_ptr<NodeAST> Interpretator::CalcExpr(std::shared_ptr<NodeAST> node)
+{
+	OperatorsManager op_manager;
+	op_manager.DoOperation(node);
+	return node;
 }
 
 
@@ -35,18 +43,15 @@ void Interpretator::runtime()
 		TokenType type = parser.line_nodes[i]->token->type;
 		if(type == TokenType::EQ || type == TokenType::FUNC_INIT)
 		{
-			objManager.Create(parser.line_nodes[i], i, std::make_shared<std::vector<std::shared_ptr<NodeAST>>>(parser.line_nodes));
+			CreateObject(new VarCreator ,parser.line_nodes[i], i, std::make_shared<std::vector<std::shared_ptr<NodeAST>>>(parser.line_nodes));
 		}
 		else if(type == TokenType::FUNCTION)
 		{
-			if(objManager.isObjectFunc(parser.line_nodes[i]->token->value))
-			{
-				ExecuteFunc(objManager.getFunc(parser.line_nodes[i]->token->value));
-			}	
+			
 		}
 		else if(type == TokenType::PRINT)
 		{
-			std::cout << objManager.CalcExpr(parser.line_nodes[i]->right)->token->value << "\n";
+			std::cout << CalcExpr(parser.line_nodes[i]->right)->token->value << "\n";
 		}
 	}
 	system("pause");

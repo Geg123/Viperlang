@@ -1,6 +1,6 @@
 #include"../include/Creator.h"
 
-void ObjectCreator::CreateObject(Creator* creator, std::shared_ptr<NodeAST> node, size_t node_iter, std::shared_ptr<std::vector<std::shared_ptr<NodeAST>>> line_nodes)
+void CreateObject(Creator* creator, std::shared_ptr<NodeAST> node, size_t node_iter, std::shared_ptr<std::vector<std::shared_ptr<NodeAST>>> line_nodes)
 {
 	creator->CreateObject(node, node_iter, line_nodes);
 	delete creator;
@@ -13,7 +13,7 @@ void FuncCreator::CreateObject(std::shared_ptr<NodeAST> node, size_t node_iter, 
 	size_t i = 0;
 	while(line_nodes->at(node_iter)->token->type != TokenType::FUNC_END)
 	{
-		func.definition_nodes[i] = line_nodes->at(node_iter);
+		func.definition_nodes[i] = *line_nodes->at(node_iter);
 		++node_iter;
 		++i;
 	}
@@ -22,7 +22,7 @@ void FuncCreator::CreateObject(std::shared_ptr<NodeAST> node, size_t node_iter, 
 		node = node->right;
 		func.def_vars.insert(node->token->value);
 	}
-	op_manager->InsertObject(std::make_shared<Object>(func));
+	obj_manager->InsertObject(std::make_shared<Object>(func));
 }
 
 void VarCreator::CreateObject(std::shared_ptr<NodeAST> node, size_t node_iter, std::shared_ptr<std::vector<std::shared_ptr<NodeAST>>> line_nodes)
@@ -30,7 +30,7 @@ void VarCreator::CreateObject(std::shared_ptr<NodeAST> node, size_t node_iter, s
 	op_manager->DoOperation(node->right);
 	std::shared_ptr<Variable> tmp = std::make_shared<Variable>(node->left->token->value, node->right->token->value);
 	tmp->type = VarTypeSelector(node->right);
-	op_manager->InsertObject(tmp);
+	obj_manager->InsertObject(tmp);
 }
 
 BasicVarType Creator::VarTypeSelector(std::shared_ptr<NodeAST> node)

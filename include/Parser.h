@@ -5,7 +5,6 @@ struct NodeAST
 {
 	NodeAST(){}
 	NodeAST(std::shared_ptr<Token> _token);
-
 	std::shared_ptr<Token> token = nullptr;
 	std::shared_ptr<NodeAST> left = nullptr;
 	std::shared_ptr<NodeAST> right = nullptr;
