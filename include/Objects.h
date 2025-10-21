@@ -6,34 +6,40 @@
 enum class BasicVarType {BOOL, INT, FLOAT, STRING, CUSTOM};
 
 struct Type;
+struct Variable;
+struct Array;
+struct Function;
 
-struct Object
-{
-    virtual ~Object(){}
-    virtual void Create(std::shared_ptr<NodeAST> node){}
-    Object(std::string _name) : name(_name){}
-    std::string name;
-};
+using Object = std::variant<std::shared_ptr<Variable>, std::shared_ptr<Array>, std::shared_ptr<Function>>;
 
-struct Variable : Object
+struct Variable
 {
-    Variable(std::string _name) : Object(_name){}
-    Variable(std::string _name, std::string _value) : Object(_name), value(_value){}
-    Variable(std::string _name, std::string _value, BasicVarType _type) : Object(_name), value(_value), type(_type){}
+    Variable(std::string _name) : name(_name){}
+    Variable(std::string _name, std::string _value) : name(_name), value(_value){}
+    Variable(std::string _name, std::string _value, BasicVarType _type) : name(_name), value(_value), type(_type){}
     std::string value;
     BasicVarType type;
+    std::string name;
+    bool operator == (Variable* right){return true;}
+    bool operator == (std::shared_ptr<Variable> right){return true;}
 };
 
-struct Array : Object
+struct Array
 {
-    Array(std::string _name) : Object(_name){}
+    Array(std::string _name) : name(_name){}
     std::vector<std::shared_ptr<Object>> array;
+    std::string name;
+    bool operator == (Array* right){return true;}
+    bool operator == (std::shared_ptr<Array> right){return true;}
 };
 
-struct Function : Object
+struct Function
 {
-    Function(std::string _name) : Object(_name){}
+    Function(std::string _name) : name(_name){}
     std::unordered_set<std::string> def_vars;
     std::unordered_map<std::string, Object> vars;
     std::vector<NodeAST> definition_nodes;
+    std::string name;
+    bool operator == (Function* right){return true;}
+    bool operator == (std::shared_ptr<Function> right){return true;}
 };
