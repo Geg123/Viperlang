@@ -18,92 +18,6 @@ Type* TokenTypeToTypeSwitcher(TokenType left, TokenType right)
     else if (left == TokenType::TRUE || right == TokenType::TRUE)
         return new Bool;
 }
-
-TokenType BasicVarTypeToType(BasicVarType type)
-{ 
-	if(type == BasicVarType::INT)
-        return TokenType::INT;
-    else if(type == BasicVarType::STRING)
-	    return TokenType::STRING;
-    else if(type == BasicVarType::BOOL)
-	    return TokenType::STRING;
-}
-   
-Type* OperatorsManager::TokenTypeToType(std::shared_ptr<NodeAST> node)
-{
-    TokenType left;
-    TokenType right;
-    BasicVarType var_type = BasicVarType::BOOL;
-    if(node->left == nullptr && node->right == nullptr)
-    {
-        if(node->token->type == TokenType::VAR)
-        {
-            return TokenTypeToTypeSwitcher(BasicVarTypeToType(dynamic_cast<Variable*>(obj_manager->getObject(node->token->value).get())->type), TokenType::AND);
-        }
-        TokenType type = node->token->type;
-        return TokenTypeToTypeSwitcher(type, TokenType::AND);
-    }
-    if(node->left != nullptr)
-    {
-        left = node->left->token->type;
-    }
-    if(node->right != nullptr)
-    {
-        right = node->right->token->type;
-    }
-    if(operators.count(left) || operators.count(right))
-    {
-        return new NotFullType;
-    }
-    if(left == TokenType::VAR)
-    {
-        std::string tmp_var_name = node->left->token->value;
-        if(obj_manager->getObject(tmp_var_name) != nullptr)
-        {
-            BasicVarType tmp_var_type;
-            try
-            {
-                tmp_var_type = dynamic_cast<Variable*>(obj_manager->getObject(tmp_var_name).get())->type;
-            }
-            catch(...)
-            {
-                std::cerr << "Error: "<< tmp_var_name << " is not a variable!\n";
-                system("pause");
-            }
-            left = BasicVarTypeToType(tmp_var_type);
-        }
-        else 
-        {
-            std::cerr << "Error: var " << tmp_var_name << " doesn't exist!\n";
-            system("pause");
-        }
-    }
-    if(right == TokenType::VAR)
-    {
-        std::string tmp_var_name = node->right->token->value;
-        if(obj_manager->getObject(tmp_var_name) != nullptr)
-        {
-            BasicVarType tmp_var_type;
-            try
-            {
-                tmp_var_type = dynamic_cast<Variable*>(obj_manager->getObject(tmp_var_name).get())->type;
-            }
-            catch(...)
-            {
-                std::cerr << "Error: "<< tmp_var_name << " is not a variable!\n";
-                system("pause");
-            }
-            right = BasicVarTypeToType(tmp_var_type);
-        }
-        else 
-        {
-            std::cerr << "Error: var " << tmp_var_name << " doesn't exist!\n";
-            system("pause");
-        }
-    }
-    return TokenTypeToTypeSwitcher(left , right);
-}
-
 void OperatorsManager::DoOperation(std::shared_ptr<NodeAST> node)
 {
     Type* type = TokenTypeToType(node);
@@ -113,14 +27,14 @@ void OperatorsManager::DoOperation(std::shared_ptr<NodeAST> node)
         DoOperation(node->right);
     }
     type = TokenTypeToType(node);
-    TypeOperations op = NodeTypeToOperator(node);
+    Operator op = NodeTypeToOperator(node);
     type->executeOperation(node, op);
     delete type;
 }
 
-TypeOperations OperatorsManager::NodeTypeToOperator(std::shared_ptr<NodeAST> node)
+Operator OperatorsManager::NodeTypeToOperator(std::shared_ptr<NodeAST> node)
 {
-    TypeOperations a;
+    Operator a;
     int type = int(node->token->type);
     switch (type)
     {
@@ -143,7 +57,7 @@ TypeOperations OperatorsManager::NodeTypeToOperator(std::shared_ptr<NodeAST> nod
 
 
 
-void Bool::executeOperation(std::shared_ptr<NodeAST> node, TypeOperations op)
+void Bool::executeOperation(std::shared_ptr<NodeAST> node, Operator op)
 {
     std::visit(Functor(node), op);
 }
@@ -216,22 +130,28 @@ void Bool::Functor::operator()(EqOperator& op)
     node->token->type = TokenType::BOOL;
 }
 
-void Int::executeOperation(std::shared_ptr<NodeAST> node, TypeOperations op)
+void Int::executeOperation(std::shared_ptr<NodeAST> node, Operator op)
 {
     std::visit(Functor(node), op);
 }
 
-void Int::Functor::getVars()
+void Int::Functor::getObjects()
 {
     if (node->left->token->type == TokenType::VAR)
     {
-        node->left->token->type = BasicVarTypeToType(dynamic_cast<Variable*>(obj_manager->getObject(node->left->token->value).get())->type);
-        node->left->token->value = dynamic_cast<Variable*>(obj_manager->getObject(node->left->token->value).get())->value;
+        if(ObjectManager::getValue(node->left) == nullptr)
+        {
+            std::cout << "Error: " << node->left->token->value << " is not a object!\n";
+            system("pause");
+        }
     }
     if (node->right->token->type == TokenType::VAR)
     {
-        node->right->token->type = BasicVarTypeToType(dynamic_cast<Variable*>(obj_manager->getObject(node->right->token->value).get())->type);
-        node->right->token->value = dynamic_cast<Variable*>(obj_manager->getObject(node->right->token->value).get())->value;
+        if(ObjectManager::getValue(node->right) == nullptr)
+        {
+            std::cout << "Error: " << node->right->token->value << " is not a object!\n";
+            system("pause");
+        }
     }
 }
 
@@ -340,7 +260,7 @@ void Int::Functor::operator()(EqOperator& op)
     node->token->type = TokenType::INT;
 }
 
-void String::executeOperation(std::shared_ptr<NodeAST> node, TypeOperations op)
+void String::executeOperation(std::shared_ptr<NodeAST> node, Operator op)
 {
     std::visit(Functor(node), op);
 }

@@ -10,7 +10,12 @@ struct Variable;
 struct Array;
 struct Function;
 
-using Object = std::variant<std::shared_ptr<Variable>, std::shared_ptr<Array>, std::shared_ptr<Function>>;
+using Object = std::variant<std::shared_ptr<Variable>, std::shared_ptr<Array>, std::shared_ptr<Function>, std::nullptr_t>;
+
+std::shared_ptr<Variable> getPtrToObj(std::shared_ptr<Variable> obj){return obj;}
+std::shared_ptr<Array> getPtrToObj(std::shared_ptr<Array> obj){return obj;}
+std::shared_ptr<Function> getPtrToObj(std::shared_ptr<Function> obj){return obj;}
+
 
 struct Variable
 {
@@ -27,17 +32,18 @@ struct Variable
 struct Array
 {
     Array(std::string _name) : name(_name){}
-    std::vector<std::shared_ptr<Object>> array;
+    std::vector<Object> array;
     std::string name;
     bool operator == (Array* right){return true;}
     bool operator == (std::shared_ptr<Array> right){return true;}
+    std::shared_ptr<Array> operator()(){return std::make_shared<Array>(this);}
 };
 
 struct Function
 {
     Function(std::string _name) : name(_name){}
-    std::unordered_set<std::string> def_vars;
-    std::unordered_map<std::string, Object> vars;
+    std::unordered_map<size_t, std::string> def_vars;
+    std::unordered_map<std::string, Object> objects;
     std::vector<NodeAST> definition_nodes;
     std::string name;
     bool operator == (Function* right){return true;}

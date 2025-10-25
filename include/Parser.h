@@ -22,6 +22,6 @@ struct Parser
 	std::shared_ptr<NodeAST> parseFor(size_t iter, size_t end_iter);
 	void Analys();
 
-	std::vector<std::shared_ptr<NodeAST>> line_nodes;
+	static std::vector<std::shared_ptr<NodeAST>> line_nodes;
 	std::shared_ptr<Lexer> lexer;
 };
