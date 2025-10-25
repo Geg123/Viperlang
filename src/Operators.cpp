@@ -18,6 +18,35 @@ Type* TokenTypeToTypeSwitcher(TokenType left, TokenType right)
     else if (left == TokenType::TRUE || right == TokenType::TRUE)
         return new Bool;
 }
+
+Type* OperatorsManager::TokenTypeToType(std::shared_ptr<NodeAST> node)
+{
+    TokenType node_type = node->token->type;
+    if(node_type == TokenType::VAR || node_type == TokenType::ARRAY || node_type == TokenType::FUNCTION)
+    {
+        ObjectManager::getValue(node);
+        return;
+    }
+    else if(node->left == nullptr && node->right == nullptr)
+    {
+        node_type = node->token->type;
+        return TokenTypeToTypeSwitcher(node_type, TokenType::AND);
+    }
+    TokenType left = node->left->token->type;
+    TokenType right = node->right->token->type;
+    if(left == TokenType::VAR || left == TokenType::ARRAY || left == TokenType::FUNCTION)
+    {
+        ObjectManager::getValue(node->left);
+    }
+    if(right == TokenType::VAR || right == TokenType::ARRAY || right == TokenType::FUNCTION)
+    {
+        ObjectManager::getValue(node->right);
+    }
+    left = node->left->token->type;
+    right = node->right->token->type;
+    return TokenTypeToTypeSwitcher(left, right);
+}
+
 void OperatorsManager::DoOperation(std::shared_ptr<NodeAST> node)
 {
     Type* type = TokenTypeToType(node);
@@ -55,7 +84,19 @@ Operator OperatorsManager::NodeTypeToOperator(std::shared_ptr<NodeAST> node)
     return EqOperator{};
 }
 
-
+void PFunctor::getObjects()
+{
+    TokenType left = node->left->token->type;
+    TokenType right = node->right->token->type;
+    if (left == TokenType::VAR || left == TokenType::FUNCTION || left == TokenType::ARRAY)
+    {
+        ObjectManager::getValue(node->left);
+    }
+    if (left == TokenType::VAR || left == TokenType::FUNCTION || left == TokenType::ARRAY)
+    {
+        ObjectManager::getValue(node->right);
+    }
+}
 
 void Bool::executeOperation(std::shared_ptr<NodeAST> node, Operator op)
 {
@@ -123,11 +164,10 @@ void Bool::Functor::operator()(NotEqOperator& op)
 
 void Bool::Functor::operator()(EqOperator& op)
 {
-    if(node->token->type == TokenType::VAR)
+    if(node->token->type == TokenType::VAR || node->token->type == TokenType::FUNCTION || node->token->type == TokenType::ARRAY)
     {
-        node->token->value = dynamic_cast<Variable*>(obj_manager->(node->token->value).get())->value;
+        ObjectManager::getValue(node);
     }
-    node->token->type = TokenType::BOOL;
 }
 
 void Int::executeOperation(std::shared_ptr<NodeAST> node, Operator op)
@@ -135,29 +175,9 @@ void Int::executeOperation(std::shared_ptr<NodeAST> node, Operator op)
     std::visit(Functor(node), op);
 }
 
-void Int::Functor::getObjects()
-{
-    if (node->left->token->type == TokenType::VAR)
-    {
-        if(ObjectManager::getValue(node->left) == nullptr)
-        {
-            std::cout << "Error: " << node->left->token->value << " is not a object!\n";
-            system("pause");
-        }
-    }
-    if (node->right->token->type == TokenType::VAR)
-    {
-        if(ObjectManager::getValue(node->right) == nullptr)
-        {
-            std::cout << "Error: " << node->right->token->value << " is not a object!\n";
-            system("pause");
-        }
-    }
-}
-
 void Int::Functor::operator()(IsEqOperator& op)
 {
-    getVars();
+    getObjects();
     if(std::stoi(node->left->token->value) == std::stoi(node->right->token->value))
     {
         node->token->value = "True";
@@ -171,7 +191,7 @@ void Int::Functor::operator()(IsEqOperator& op)
 
 void Int::Functor::operator()(NotEqOperator& op)
 {
-    getVars();
+    getObjects();
     if(std::stoi(node->left->token->value) != std::stoi(node->right->token->value))
     {
         node->token->value = "True";
@@ -185,7 +205,7 @@ void Int::Functor::operator()(NotEqOperator& op)
 
 void Int::Functor::operator()(GreaterOperator& op)
 {
-    getVars();
+    getObjects();
     if(std::stoi(node->left->token->value) > std::stoi(node->right->token->value))
     {
         node->token->value = "True";
@@ -199,7 +219,7 @@ void Int::Functor::operator()(GreaterOperator& op)
 
 void Int::Functor::operator()(LessOperator& op)
 {
-    getVars();
+    getObjects();
     if(std::stoi(node->left->token->value) < std::stoi(node->right->token->value))
     {
         node->token->value = "True";
@@ -213,28 +233,28 @@ void Int::Functor::operator()(LessOperator& op)
 
 void Int::Functor::operator()(PlusOperator& op)
 {
-    getVars();
+    getObjects();
     node->token->value = std::to_string(std::stoi(node->left->token->value) + std::stoi(node->right->token->value));
     node->token->type = TokenType::INT;
 }
 
 void Int::Functor::operator()(MinusOperator& op)
 {
-    getVars();
+    getObjects();
     node->token->value = std::to_string(std::stoi(node->left->token->value) - std::stoi(node->right->token->value));
     node->token->type = TokenType::INT;
 }
 
 void Int::Functor::operator()(MultOperator& op)
 {
-    getVars();
+    getObjects();
     node->token->value = std::to_string(std::stoi(node->left->token->value) * std::stoi(node->right->token->value));
     node->token->type = TokenType::INT;
 }
 
 void Int::Functor::operator()(DivOperator& op)
 {
-    getVars();
+    getObjects();
     if(std::stoi(node->right->token->value) == 0)
     {
         std::cerr << "Error: you can't divide by zero!\n";
@@ -246,18 +266,17 @@ void Int::Functor::operator()(DivOperator& op)
 
 void Int::Functor::operator()(PowerOperator& op)
 {
-    getVars();
+    getObjects();
     node->token->value = std::to_string(int(pow(std::stoi(node->left->token->value), std::stoi(node->right->token->value))));
     node->token->type = TokenType::INT;
 }
 
 void Int::Functor::operator()(EqOperator& op)
 {
-    if(node->token->type == TokenType::VAR)
+    if(node->token->type == TokenType::VAR || node->token->type == TokenType::FUNCTION || node->token->type == TokenType::ARRAY)
     {
-        node->token->value = dynamic_cast<Variable*>(obj_manager->getObject(node->token->value).get())->value;
+        ObjectManager::getValue(node);
     }
-    node->token->type = TokenType::INT;
 }
 
 void String::executeOperation(std::shared_ptr<NodeAST> node, Operator op)
@@ -265,39 +284,24 @@ void String::executeOperation(std::shared_ptr<NodeAST> node, Operator op)
     std::visit(Functor(node), op);
 }
 
-void String::Functor::getVars()
-{
-    if (node->left->token->type == TokenType::VAR)
-    {
-        node->left->token->type = BasicVarTypeToType(dynamic_cast<Variable*>(obj_manager->getObject(node->left->token->value).get())->type);
-        node->left->token->value = dynamic_cast<Variable*>(obj_manager->getObject(node->left->token->value).get())->value;
-    }
-    if (node->right->token->type == TokenType::VAR)
-    {
-        node->right->token->type = BasicVarTypeToType(dynamic_cast<Variable*>(obj_manager->getObject(node->right->token->value).get())->type);
-        node->right->token->value = dynamic_cast<Variable*>(obj_manager->getObject(node->right->token->value).get())->value;
-    }
-}
-
 void String::Functor::operator()(EqOperator& op)
 {
-    if(node->token->type == TokenType::VAR)
+    if(node->token->type == TokenType::VAR || node->token->type == TokenType::FUNCTION || node->token->type == TokenType::ARRAY)
     {
-        node->token->value = dynamic_cast<Variable*>(obj_manager->getObject(node->token->value).get())->value;
+        ObjectManager::getValue(node);
     }
-    node->token->type = TokenType::STRING;
 }
 
 void String::Functor::operator()(PlusOperator& op)
 {
-    getVars();
+    getObjects();
     node->token->value = node->left->token->value + node->right->token->value;
     node->token->type = TokenType::INT;
 }
 
 void String::Functor::operator()(MultOperator& op)
 {
-    getVars();
+    getObjects();
     if((node->left->token->type == TokenType::STRING && node->right->token->type == TokenType::NUMBER) || (node->left->token->type == TokenType::STRING && node->right->token->type == TokenType::INT))
     {
         int i = std::stoi(node->right->token->value);
@@ -331,7 +335,7 @@ void String::Functor::operator()(MultOperator& op)
 
 void String::Functor::operator()(IsEqOperator& op)
 {
-    getVars();
+    getObjects();
     if(node->left->token->value == node->right->token->value)
     {
         node->token->value = "True";
@@ -345,7 +349,7 @@ void String::Functor::operator()(IsEqOperator& op)
 
 void String::Functor::operator()(NotEqOperator& op)
 {
-    getVars();
+    getObjects();
     if(node->left->token->value != node->right->token->value)
     {
         node->token->value = "True";

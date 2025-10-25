@@ -9,5 +9,4 @@ private:
     std::shared_ptr<NodeAST> CalcExpr(std::shared_ptr<NodeAST> node);
     Lexer main;
     Parser parser;
-    ObjectManager* objManager;
 };

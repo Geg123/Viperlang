@@ -29,15 +29,21 @@ struct Type
     virtual void executeOperation(std::shared_ptr<NodeAST> node, Operator op){}
 };
 
-struct OperatorsManager
+class OperatorsManager
 {
 private:
-    Operator* _operator;
-    Type* type;
+    OperatorsManager();
 public:
-    Operator NodeTypeToOperator(std::shared_ptr<NodeAST> node);
-    Type* TokenTypeToType(std::shared_ptr<NodeAST> node);//is used by DoOperation()
-    void DoOperation(std::shared_ptr<NodeAST> node);
+    static Operator NodeTypeToOperator(std::shared_ptr<NodeAST> node);
+    static Type* TokenTypeToType(std::shared_ptr<NodeAST> node);//is used by DoOperation()
+    static void DoOperation(std::shared_ptr<NodeAST> node);
+};
+
+struct PFunctor
+{
+    void getObjects();
+    std::shared_ptr<NodeAST> node;
+    PFunctor(std::shared_ptr<NodeAST> _node) : node(_node){}
 };
 
 struct NotFullType : Type
@@ -49,11 +55,9 @@ struct Bool : Type
 {
     void executeOperation(std::shared_ptr<NodeAST> node, Operator op);
 private:
-    struct Functor
-    {        
-        void getObjects();
-        std::shared_ptr<NodeAST> node;
-        Functor(std::shared_ptr<NodeAST> _node) : node(_node){}
+    struct Functor : PFunctor
+    {       
+        Functor(std::shared_ptr<NodeAST> _node) : PFunctor(_node){}
         void operator()(EqOperator& op);
         void operator()(IsEqOperator& op);
         void operator()(AndOperator& op);
@@ -74,11 +78,9 @@ struct Int : Type
 {
     void executeOperation(std::shared_ptr<NodeAST> node, Operator op);
 private:
-    struct Functor
+    struct Functor: PFunctor
     {        
-        void getObjects();
-        std::shared_ptr<NodeAST> node;
-        Functor(std::shared_ptr<NodeAST> _node) : node(_node){}
+        Functor(std::shared_ptr<NodeAST> _node) : PFunctor(_node){}
         void operator()(EqOperator& op);
         void operator()(PlusOperator& op);
         void operator()(MinusOperator& op);
@@ -99,11 +101,9 @@ struct Float : Type
 {
     void executeOperation(std::shared_ptr<NodeAST> node, Operator op);
 private:
-    struct Functor
+    struct Functor : PFunctor
     {
-        void getObjects();
-        std::shared_ptr<NodeAST> node;
-        Functor(std::shared_ptr<NodeAST> _node) : node(_node){}
+        Functor(std::shared_ptr<NodeAST> _node) : PFunctor(_node){}
         void operator()(EqOperator& op);
         void operator()(IsEqOperator& op);
         void operator()(AndOperator& op);
@@ -115,11 +115,9 @@ struct String : Type
 {
     void executeOperation(std::shared_ptr<NodeAST> node, Operator op);
 private:
-    struct Functor
+    struct Functor : PFunctor
     {
-        void getObjects();
-        std::shared_ptr<NodeAST> node;
-        Functor(std::shared_ptr<NodeAST> _node) : node(_node){}
+        Functor(std::shared_ptr<NodeAST> _node) : PFunctor(_node){}
         void operator()(EqOperator& op);
         void operator()(IsEqOperator& op);
         void operator()(NotEqOperator& op);

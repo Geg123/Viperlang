@@ -22,32 +22,36 @@ Interpretator::Interpretator(std::string path)
 	file.close();
 	parser.ParserLexerInit(&main);
 	parser.Analys();
-	objManager = ObjectManager::getInstance();
+	ObjectManager::start();
 	runtime();
 	system("pause");
 }
 
-std::shared_ptr<NodeAST> Interpretator::CalcExpr(std::shared_ptr<NodeAST> node)
+void ObjectManager::CalcExpr(std::shared_ptr<NodeAST> node)
 {
-	OperatorsManager op_manager;
-	op_manager.DoOperation(node);
-	return node;
+	OperatorsManager::DoOperation(node);
 }
-
 
 void Interpretator::runtime()
 {
+	VarCreator var_crt;
+	FuncCreator func_crt;
+	ArrayCreator arr_crt;
 	size_t size = parser.line_nodes.size();
 	for(size_t i = 0; i < size; ++i)
 	{
 		TokenType type = parser.line_nodes[i]->token->type;
-		if(type == TokenType::EQ || type == TokenType::FUNC_INIT)
+		if(type == TokenType::EQ)
 		{
-			CreateObject(new VarCreator ,parser.line_nodes[i], i, std::make_shared<std::vector<std::shared_ptr<NodeAST>>>(parser.line_nodes));
+			var_crt.CreateObject(parser.line_nodes[i]);
 		}
 		else if(type == TokenType::FUNCTION)
 		{
 			
+		}
+		else if(type == TokenType::FUNC_INIT)
+		{
+
 		}
 		else if(type == TokenType::PRINT)
 		{

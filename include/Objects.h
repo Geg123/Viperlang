@@ -49,3 +49,5 @@ struct Function
     bool operator == (Function* right){return true;}
     bool operator == (std::shared_ptr<Function> right){return true;}
 };
+
+BasicVarType VarTypeSelector(std::shared_ptr<NodeAST> node);
