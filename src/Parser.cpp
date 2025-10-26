@@ -581,13 +581,26 @@ void Parser::Analys()
 			return;
 		}
 
-		std::string type = TokenTypeSwitch(lexer->tokens[i]->type);
+		TokenType type = lexer->tokens[i]->type;
 		size_t tabs = 0;
-		for (; TokenTypeSwitch(lexer->tokens[i]->type) == "TAB"; ++tabs, ++i){}
-		type = TokenTypeSwitch(lexer->tokens[i]->type);
+		if (type == TokenType::END)
+		{
+			continue;
+		}
+		for (; lexer->tokens[i]->type == TokenType::TAB; ++tabs, ++i){}
+		type = lexer->tokens[i]->type;
 
 		if (tabs < (if_tab_q + func_tab_q + cycle_tab_q))
 		{
+			if (tabs == 0 && func_tab_q != 0 && if_tab_q != 0)
+			{
+				root = std::make_shared<NodeAST>(std::make_shared<Token>(TokenType::IF_END, ""));
+				--if_tab_q;
+				line_nodes.push_back(root);
+				root = std::make_shared<NodeAST>(std::make_shared<Token>(TokenType::FUNC_END, ""));
+				--func_tab_q;
+				line_nodes.push_back(root);
+			}
 			if (tabs < func_tab_q)
 			{
 				root = std::make_shared<NodeAST>(std::make_shared<Token>(TokenType::FUNC_END, ""));
@@ -611,7 +624,7 @@ void Parser::Analys()
 			}
 		}
 
-		if (type == "EQ")
+		if (type == TokenType::EQ)
 		{
 			bool found_right = false;
 			bool ArrDef = false;
@@ -673,11 +686,7 @@ void Parser::Analys()
 
 			line_nodes.push_back(root);
 		}
-		else if (type == "END")
-		{
-			continue;
-		}
-		else if (type == "VAR" && TokenTypeSwitch(lexer->tokens[i + 1]->type) == "EQ")
+		else if (type == TokenType::VAR && lexer->tokens[i + 1]->type == TokenType::EQ)
 		{
 			++i;
 			bool found_right = false;
@@ -727,11 +736,13 @@ void Parser::Analys()
 
 			line_nodes.push_back(root);
 		}
-		else if (type == "LEFT_BRACKET")
+		else if (type == TokenType::VAR && lexer->tokens[i + 1]->type == TokenType::LEFT_BRACKET)
 		{
-			if (lexer->tokens[i - 1]->type == TokenType::VAR)
+			if (true)
 			{
-				size_t name = i - 1;
+				size_t name = i;
+
+				++i;
 
 				size_t j = ++i;
 				while(lexer->tokens[i]->type != TokenType::COLON && lexer->tokens[i]->type != TokenType::END)
@@ -757,7 +768,7 @@ void Parser::Analys()
 				}
 			}
 		}
-		else if (type == "IF")
+		else if (type == TokenType::IF)
 		{
 			root = std::make_shared<NodeAST>(lexer->tokens[i]);
 			size_t j = i + 1;
@@ -767,7 +778,7 @@ void Parser::Analys()
 			++if_tab_q;
 			i = j+1;
 		}
-		else if (type == "FOR")
+		else if (type == TokenType::FOR)
 		{
 			root = std::make_shared<NodeAST>(lexer->tokens[i]);
 			size_t j = i + 1;
@@ -778,7 +789,7 @@ void Parser::Analys()
 			i = j + 1;
 			++tokens_size;
 		}
-		else if (type == "RETURN")
+		else if (type == TokenType::RETURN)
 		{
 			root = std::make_shared<NodeAST>(lexer->tokens[i]);
 			
@@ -805,10 +816,10 @@ void Parser::Analys()
 
 			line_nodes.push_back(root);
 		}
-		else if (type == "PRINT")
+		else if (type == TokenType::PRINT)
 		{
 			//����������� ������ print'� � ����� parsePrint();
-			if (TokenTypeSwitch(lexer->tokens[i + 1]->type) != "LEFT_BRACKET")
+			if (lexer->tokens[i + 1]->type != TokenType::LEFT_BRACKET)
 				//throw "Doesn't ( after print";
 			{
 				std::cout << "After print must be brackets" << "\n";
@@ -856,5 +867,6 @@ void Parser::Analys()
 		}
 	}
 
-
+	if (line_nodes.back()->token->type != TokenType::END)
+		line_nodes.push_back(std::make_shared<NodeAST>(std::make_shared<Token>(TokenType::END, "")));
 }

@@ -1,4 +1,4 @@
-#include"Operators.h"
+#include"Objects.h"
 
 /*class Creator
 {
@@ -9,7 +9,6 @@ protected:
     std::shared_ptr<OperatorsManager> op_manager;
     BasicVarType VarTypeSelector(std::shared_ptr<NodeAST> node);
 };*/
-
 
 class VarCreator
 {
@@ -24,5 +23,5 @@ public:
 class FuncCreator
 {
 public:
-    void CreateObject(std::shared_ptr<NodeAST> node, size_t node_iter);
+    void CreateObject(std::shared_ptr<NodeAST> node, size_t& node_iter);
 };

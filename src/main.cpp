@@ -5,7 +5,7 @@
 int main()
 {
 	setlocale(LC_ALL, "ru");
-	Interpretator main("C:/NewTest.geg");
+	Interpretator main("C:/Factorial.geg");
 }
 
 

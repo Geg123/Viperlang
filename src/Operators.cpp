@@ -5,7 +5,9 @@ std::unordered_set<TokenType> operators{ TokenType::PLUS, TokenType::MINUS, Toke
 
 Type* TokenTypeToTypeSwitcher(TokenType left, TokenType right)
 {
-	if(left == TokenType::STRING || right == TokenType::STRING)
+    if(operators.count(left) || operators.count(right))
+        return new NotFullType;
+	else if(left == TokenType::STRING || right == TokenType::STRING)
         return new String;
     else if(left == TokenType::NUMBER || right == TokenType::NUMBER)
 	    return new Int;
@@ -25,12 +27,12 @@ Type* OperatorsManager::TokenTypeToType(std::shared_ptr<NodeAST> node)
     if(node_type == TokenType::VAR || node_type == TokenType::ARRAY || node_type == TokenType::FUNCTION)
     {
         ObjectManager::getValue(node);
-        return;
+        return TokenTypeToTypeSwitcher(node->token->type, TokenType::RETURN);;
     }
-    else if(node->left == nullptr && node->right == nullptr)
+    else if(node->left == nullptr)
     {
         node_type = node->token->type;
-        return TokenTypeToTypeSwitcher(node_type, TokenType::AND);
+        return TokenTypeToTypeSwitcher(node_type, TokenType::RETURN);
     }
     TokenType left = node->left->token->type;
     TokenType right = node->right->token->type;
@@ -54,8 +56,8 @@ void OperatorsManager::DoOperation(std::shared_ptr<NodeAST> node)
     {
         DoOperation(node->left);
         DoOperation(node->right);
+        type = TokenTypeToType(node);
     }
-    type = TokenTypeToType(node);
     Operator op = NodeTypeToOperator(node);
     type->executeOperation(node, op);
     delete type;

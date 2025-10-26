@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.8)
 
-project(Viper-interpretator)
+project(Geg-interpretator)
 
 add_executable(Interpretator
 	src/main.cpp

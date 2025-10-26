@@ -1,4 +1,4 @@
-#include"../include/Creator.h"
+#include"../include/Operators.h"
 
 NodeAST copyNodeTo(std::shared_ptr<NodeAST> node)
 {
@@ -29,11 +29,10 @@ BasicVarType VarTypeSelector(std::shared_ptr<NodeAST> node)
 		return BasicVarType::BOOL;
 }
 
-void FuncCreator::CreateObject(std::shared_ptr<NodeAST> node, size_t node_iter)
+void FuncCreator::CreateObject(std::shared_ptr<NodeAST> node, size_t& node_iter)
 {
 	Function func(node->token->value);
 	++node_iter;
-	size_t i = 0;
 	while(Parser::line_nodes.at(node_iter)->token->type != TokenType::FUNC_END)
 	{
 		func.definition_nodes.push_back(copyNodeTo(Parser::line_nodes.at(node_iter)));
@@ -49,10 +48,12 @@ void FuncCreator::CreateObject(std::shared_ptr<NodeAST> node, size_t node_iter)
 	ObjectManager::InsertObject(std::make_shared<Function>(func));
 }
 
-void CreateObject(std::shared_ptr<NodeAST> node)
+void VarCreator::CreateObject(std::shared_ptr<NodeAST> node)
 {
 	OperatorsManager::DoOperation(node->right);
 	std::shared_ptr<Variable> tmp = std::make_shared<Variable>(node->left->token->value, node->right->token->value);
 	tmp->type = VarTypeSelector(node->right);
 	ObjectManager::InsertObject(tmp);
 }
+
+void ArrayCreator::CreateObject(std::shared_ptr<NodeAST> node){}
