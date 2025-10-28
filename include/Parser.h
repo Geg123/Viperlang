@@ -1,5 +1,6 @@
 #pragma once
 #include"Lexer.h"
+#include<stack>
 
 struct NodeAST
 {
@@ -21,7 +22,7 @@ struct Parser
 	std::shared_ptr<NodeAST> parseFuncInit(size_t iter, size_t end_iter);
 	std::shared_ptr<NodeAST> parseFor(size_t iter, size_t end_iter);
 	void Analys();
-
+	std::stack<TokenType> tabs_stack;
 	static inline std::vector<std::shared_ptr<NodeAST>> line_nodes;
 	std::shared_ptr<Lexer> lexer;
 };

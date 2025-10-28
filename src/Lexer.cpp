@@ -248,8 +248,6 @@ void Lexer::parseVar()
 		tokens.push_back(std::make_shared<Token>(TokenType::IF, var));
 	else if(var == "print")
 		tokens.push_back(std::make_shared<Token>(TokenType::PRINT, var));
-	else if (var == "input")
-		tokens.push_back(std::make_shared<Token>(TokenType::INPUT, var));
 	else if (var == "True")
 		tokens.push_back(std::make_shared<Token>(TokenType::TRUE, var));
 	else if (var == "False")
@@ -260,8 +258,6 @@ void Lexer::parseVar()
 		tokens.push_back(std::make_shared<Token>(TokenType::OR, var));
 	else if (var == "return")
 		tokens.push_back(std::make_shared<Token>(TokenType::RETURN, var));
-	else if (var == "int")
-		tokens.push_back(std::make_shared<Token>(TokenType::INT, var));
 	else if (var == "for")
 		tokens.push_back(std::make_shared<Token>(TokenType::FOR, var));
 	else if (var == "in")

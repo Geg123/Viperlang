@@ -25,8 +25,8 @@ struct Variable
     std::string value;
     BasicVarType type;
     std::string name;
-    bool operator == (Variable* right){return true;}
-    bool operator == (std::shared_ptr<Variable> right){return true;}
+    //bool operator == (Variable* right){return true;}
+    //bool operator == (std::shared_ptr<Variable> right){return true;}
 };
 
 struct Array
@@ -34,8 +34,8 @@ struct Array
     Array(std::string _name) : name(_name){}
     std::vector<Object> array;
     std::string name;
-    bool operator == (Array* right){return true;}
-    bool operator == (std::shared_ptr<Array> right){return true;}
+    //bool operator == (Array* right){return true;}
+    //bool operator == (std::shared_ptr<Array> right){return true;}
     //std::shared_ptr<Array> operator()(){return std::make_shared<Array>(this);}
 };
 
@@ -46,8 +46,8 @@ struct Function
     std::unordered_map<std::string, Object> objects;
     std::vector<NodeAST> definition_nodes;
     std::string name;
-    bool operator == (Function* right){return true;}
-    bool operator == (std::shared_ptr<Function> right){return true;}
+    //bool operator == (Function* right){return true;}
+    //bool operator == (std::shared_ptr<Function> right){return true;}
 };
 
 BasicVarType VarTypeSelector(std::shared_ptr<NodeAST> node);

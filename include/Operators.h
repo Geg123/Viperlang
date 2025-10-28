@@ -51,6 +51,30 @@ struct NotFullType : Type
     bool test() override {return false;} 
 };
 
+struct ArrType : Type
+{
+    void executeOperation(std::shared_ptr<NodeAST> node, Operator op);
+private:
+    struct Functor : PFunctor
+    {       
+        Functor(std::shared_ptr<NodeAST> _node) : PFunctor(_node){}
+        void operator()(EqOperator& op);
+        void operator()(IsEqOperator& op);
+        void operator()(AndOperator& op){std::cerr << "Error: you can't do this operation!\n"; system("pause");}
+        void operator()(OrOperator& op){std::cerr << "Error: you can't do this operation!\n"; system("pause");}
+        void operator()(NotEqOperator& op);
+        void operator()(SqBracketsOperator& op){std::cerr << "Error: you can't do this operation!\n"; system("pause");}
+        void operator()(NotOperator& op){std::cerr << "Error: you can't do this operation!\n"; system("pause");}
+        void operator()(MultOperator& op);
+        void operator()(PlusOperator& op);
+        void operator()(MinusOperator& op){std::cerr << "Error: you can't do this operation!\n"; system("pause");}
+        void operator()(DivOperator& op){std::cerr << "Error: you can't do this operation!\n"; system("pause");}
+        void operator()(PowerOperator& op){std::cerr << "Error: you can't do this operation!\n"; system("pause");}
+        void operator()(LessOperator& op){std::cerr << "Error: you can't do this operation!\n"; system("pause");}
+        void operator()(GreaterOperator& op){std::cerr << "Error: you can't do this operation!\n"; system("pause");}
+    };
+};
+
 struct Bool : Type
 {
     void executeOperation(std::shared_ptr<NodeAST> node, Operator op);

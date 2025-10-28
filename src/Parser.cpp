@@ -101,24 +101,84 @@ std::shared_ptr<NodeAST> Parser::parseExpr(size_t iter, size_t end_iter)
 		}
 		else if (type == TokenType::VAR)
 		{
-			if(lexer->tokens[i + 1]->type == TokenType::SQ_LEFT_BRACKET)
+			if (lexer->tokens[i]->value == "input")
+			{
+				nodes.push_back(std::make_shared<NodeAST>(lexer->tokens[i]));
+				int brackets_pares = 0;
+				size_t j = i + 2;
+				if (lexer->tokens[i + 1]->type == TokenType::LEFT_BRACKET) {
+					while (1)
+					{
+						if (lexer->tokens[j]->type == TokenType::LEFT_BRACKET)
+							++brackets_pares;
+						else if (lexer->tokens[j]->type == TokenType::RIGHT_BRACKET && brackets_pares != 0)
+							--brackets_pares;
+						else if (lexer->tokens[j]->type == TokenType::RIGHT_BRACKET && brackets_pares == 0)
+							break;
+						++j;
+					}
+					//nodes.push_back(parseExpr(i + 2, j));
+					if (j != i + 2)
+					{
+						nodes[nodes.size() - 1]->right = parseExpr(i + 2, j);
+					}
+					i = j;
+				}
+				//input = true;
+				else
+				{
+					std::cout << "Error: expected \"(\" after \"input\"!\n";
+					system("pause");
+				}
+			}
+			else if (lexer->tokens[i]->value == "int")
+			{
+				nodes.push_back(std::make_shared<NodeAST>(lexer->tokens[i]));
+				int brackets_pares = 0;
+				size_t j = i + 2;
+				if (lexer->tokens[i + 1]->type == TokenType::LEFT_BRACKET) {
+					while (1)
+					{
+						if (lexer->tokens[j]->type == TokenType::LEFT_BRACKET)
+							++brackets_pares;
+						else if (lexer->tokens[j]->type == TokenType::RIGHT_BRACKET && brackets_pares != 0)
+							--brackets_pares;
+						else if (lexer->tokens[j]->type == TokenType::RIGHT_BRACKET && brackets_pares == 0)
+							break;
+						++j;
+					}
+					//nodes.push_back(parseExpr(i + 2, j));
+					if (j != i + 2)
+					{
+						nodes[nodes.size() - 1]->right = parseExpr(i + 2, j);
+					}
+					i = j;
+				}
+				//input = true;
+				else
+				{
+					std::cout << "Error: expected \"(\" after \"int\"!\n";
+					system("pause");
+				}
+			}
+			else if(lexer->tokens[i + 1]->type == TokenType::SQ_LEFT_BRACKET)
 			{
 				int brackets_pares = 0;
-			size_t j = i + 1;
-			while (1)
-			{
-				if (lexer->tokens[j]->type == TokenType::SQ_LEFT_BRACKET)
-					++brackets_pares;
-				else if (lexer->tokens[j]->type == TokenType::SQ_RIGHT_BRACKET && brackets_pares != 0)
-					--brackets_pares;
-				else if (lexer->tokens[j]->type == TokenType::SQ_RIGHT_BRACKET && brackets_pares == 0)
-					break;
-				++j;
+				size_t j = i + 1;
+				while (1)
+				{
+					if (lexer->tokens[j]->type == TokenType::SQ_LEFT_BRACKET)
+						++brackets_pares;
+					else if (lexer->tokens[j]->type == TokenType::SQ_RIGHT_BRACKET && brackets_pares != 0)
+						--brackets_pares;
+					else if (lexer->tokens[j]->type == TokenType::SQ_RIGHT_BRACKET && brackets_pares == 0)
+						break;
+					++j;
+				}
+				nodes.push_back(parseArrayIndex(j));
+				i = j;
 			}
-			nodes.push_back(parseArrayIndex(j));
-			i = j;
-			}
-			if (lexer->tokens[i + 1]->type == TokenType::LEFT_BRACKET)
+			else if (lexer->tokens[i + 1]->type == TokenType::LEFT_BRACKET)
 			{
 				lexer->tokens[i]->type = TokenType::FUNCTION;
 				nodes.push_back(std::make_shared<NodeAST>(lexer->tokens[i]));
@@ -128,11 +188,24 @@ std::shared_ptr<NodeAST> Parser::parseExpr(size_t iter, size_t end_iter)
 
 				std::shared_ptr<NodeAST> tmp = nodes[nodes.size() - 1];
 
+				current += 2;
+
+				size_t l_brac = 0;
+				size_t k = current;
+				while (1)
+				{
+					if (lexer->tokens[k]->type == TokenType::LEFT_BRACKET)
+						++l_brac;
+					else if (lexer->tokens[k]->type == TokenType::RIGHT_BRACKET && l_brac != 0)
+						--l_brac;
+					else if (lexer->tokens[k]->type == TokenType::RIGHT_BRACKET && l_brac == 0)
+						break;
+					++k;
+				}
 				while (1)
 				{
 					bool found_right = false;
-
-					for (size_t j = current; lexer->tokens[j]->type != TokenType::COMMA && lexer->tokens[j]->type != TokenType::RIGHT_BRACKET; ++j)
+					for (size_t j = current; lexer->tokens[j]->type != TokenType::COMMA && j < k; ++j)
 					{
 						if (lexer->tokens[j]->type == TokenType::NUMBER)
 						{
@@ -157,13 +230,14 @@ std::shared_ptr<NodeAST> Parser::parseExpr(size_t iter, size_t end_iter)
 
 					if (found_right)
 					{
-						tmp->right = parseExpr(current, curr_end);
+						tmp->left = std::make_shared<NodeAST>(std::make_shared<Token>(TokenType::FUNCTION, "node"));
+						tmp->left->right = parseExpr(current, curr_end);
 					}
 
 					current = ++curr_end;
-
-					if (lexer->tokens[current - 1]->type != TokenType::RIGHT_BRACKET)
-						tmp = tmp->right;
+					//lexer->tokens[current]->type != TokenType::COMMA
+					if (lexer->tokens[current - 1]->type != TokenType::RIGHT_BRACKET || lexer->tokens[current]->type == TokenType::COMMA)
+						tmp = tmp->left;
 					else
 					{
 						break;
@@ -244,7 +318,22 @@ std::shared_ptr<NodeAST> Parser::parseExpr(size_t iter, size_t end_iter)
 			nodes.push_back(parseExpr(i + 1, j));
 			i = j;
 		}
-
+		else if(type == TokenType::SQ_LEFT_BRACKET)
+		{
+			size_t l_sqbrac = 0;
+			size_t k = ++i;
+			while (1)
+			{
+			if (lexer->tokens[k]->type == TokenType::SQ_LEFT_BRACKET)
+				++l_sqbrac;
+			else if (lexer->tokens[k]->type == TokenType::SQ_RIGHT_BRACKET && l_sqbrac != 0)
+				--l_sqbrac;
+			else if (lexer->tokens[k]->type == TokenType::SQ_RIGHT_BRACKET && l_sqbrac == 0)
+				break;
+			++k;
+			}
+			nodes.push_back(parseArray(i, k));
+		}
 	}
 	if(power)
 	{
@@ -408,20 +497,29 @@ std::shared_ptr<NodeAST> Parser::parseIF(size_t iter, size_t end_iter)
 
 std::shared_ptr<NodeAST> Parser::parseArray(size_t iter, size_t end_iter)
 {
-	std::shared_ptr<NodeAST> nodes = std::make_shared<NodeAST>(std::make_shared<Token>(TokenType::ARR_LIST,""));
-	size_t node_iter = 0;
-
+	std::shared_ptr<NodeAST> root = std::make_shared<NodeAST>(std::make_shared<Token>(TokenType::ARR_LIST,"root"));
+	//zsize_t node_iter = 0;
 	size_t current = iter;
 	size_t curr_end;
-	nodes->token->type = TokenType::ARR_LIST;
-
-	std::shared_ptr<NodeAST> res = nodes;
-
+	size_t index = 0;
+	root->left = std::make_shared<NodeAST>(std::make_shared<Token>(TokenType::ARR_LIST, std::to_string(index)));
+	std::shared_ptr<NodeAST> node = root->left;
+	size_t l_sqbrac = 0;
+	size_t k = current;
+	while (1)
+	{
+		if (lexer->tokens[k]->type == TokenType::SQ_LEFT_BRACKET)
+			++l_sqbrac;
+		else if (lexer->tokens[k]->type == TokenType::SQ_RIGHT_BRACKET && l_sqbrac != 0)
+			--l_sqbrac;
+		else if (lexer->tokens[k]->type == TokenType::SQ_RIGHT_BRACKET && l_sqbrac == 0)
+			break;
+		++k;
+	}
 	while (1)
 	{
 		bool found_right = false;
-
-		for (size_t j = current ; lexer->tokens[j]->type != TokenType::COMMA && lexer->tokens[j]->type != TokenType::SQ_RIGHT_BRACKET; ++j)
+		for (size_t j = current ; lexer->tokens[j]->type != TokenType::COMMA && j < k; ++j)
 		{
 			if (lexer->tokens[j]->type == TokenType::NUMBER)
 			{
@@ -431,11 +529,11 @@ std::shared_ptr<NodeAST> Parser::parseArray(size_t iter, size_t end_iter)
 			{
 				found_right = true;
 			}
-			else if (TokenTypeSwitch(lexer->tokens[j]->type) == "VAR")
+			else if (lexer->tokens[j]->type == TokenType::VAR)
 			{
 				found_right = true;
 			}
-			else if (TokenTypeSwitch(lexer->tokens[j]->type) == "BOOL")
+			else if (lexer->tokens[j]->type == TokenType::BOOL)
 			{
 				found_right = true;
 			}
@@ -449,16 +547,19 @@ std::shared_ptr<NodeAST> Parser::parseArray(size_t iter, size_t end_iter)
 			std::cout << "Element of array must be variable or number or string";
 			system("pause");
 		}
-		nodes->right = parseExpr(current, curr_end);
+		node->right = parseExpr(current, curr_end);
 
 		current = ++curr_end;
 
-		if (current != end_iter)
-			nodes = nodes->right;
+		if (current <= k)
+		{
+			node->left = std::make_shared<NodeAST>(std::make_shared<Token>(TokenType::ARR_LIST, std::to_string(++index)));
+			node = node->left;
+		}
 		else
 			break;
 	}
-	return res;
+	return root;
 }
 
 
@@ -501,21 +602,21 @@ std::shared_ptr<NodeAST> Parser::parseFuncInit(size_t iter, size_t end_iter)
 	{
 		bool found_right = false;
 
-		for (size_t j = current; TokenTypeSwitch(lexer->tokens[j]->type) != "COMMA" && TokenTypeSwitch(lexer->tokens[j]->type) != "RIGHT_BRACKET"; ++j)
+		for (size_t j = current; lexer->tokens[j]->type != TokenType::COMMA && lexer->tokens[j]->type != TokenType::RIGHT_BRACKET; ++j)
 		{
-			if (TokenTypeSwitch(lexer->tokens[j]->type) == "NUMBER")
+			if (lexer->tokens[j]->type == TokenType::NUMBER)
 			{
 				found_right = true;
 			}
-			else if (TokenTypeSwitch(lexer->tokens[j]->type) == "STRING")
+			else if (lexer->tokens[j]->type == TokenType::STRING)
 			{
 				found_right = true;
 			}
-			else if (TokenTypeSwitch(lexer->tokens[j]->type) == "BOOL")
+			else if (lexer->tokens[j]->type == TokenType::BOOL)
 			{
 				found_right = true;
 			}
-			else if (TokenTypeSwitch(lexer->tokens[j]->type) == "VAR")
+			else if (lexer->tokens[j]->type == TokenType::VAR)
 			{
 				found_right = true;
 			}
@@ -563,24 +664,11 @@ void Parser::Analys()
 
 	size_t end_iter;
 
-	unsigned char if_tab_q = 0;
-	unsigned char func_tab_q = 0;
-	unsigned char cycle_tab_q = 0;
-
 	bool last_end = false;
 	
 
 	for (size_t i = 0; i < tokens_size; ++i)
 	{
-		if (lexer->tokens.size() <= i)
-		{
-			root = std::make_shared<NodeAST>(std::make_shared<Token>(StringToTokenType("FOR_END"), ""));
-			//root->token->type = StringToTokenType("IF_END");
-			--cycle_tab_q;
-			line_nodes.push_back(root);
-			return;
-		}
-
 		TokenType type = lexer->tokens[i]->type;
 		size_t tabs = 0;
 		if (type == TokenType::END)
@@ -590,37 +678,29 @@ void Parser::Analys()
 		for (; lexer->tokens[i]->type == TokenType::TAB; ++tabs, ++i){}
 		type = lexer->tokens[i]->type;
 
-		if (tabs < (if_tab_q + func_tab_q + cycle_tab_q))
+		size_t size = tabs_stack.size();
+		if (tabs < size)
 		{
-			if (tabs == 0 && func_tab_q != 0 && if_tab_q != 0)
+			while(tabs != size)
 			{
-				root = std::make_shared<NodeAST>(std::make_shared<Token>(TokenType::IF_END, ""));
-				--if_tab_q;
-				line_nodes.push_back(root);
-				root = std::make_shared<NodeAST>(std::make_shared<Token>(TokenType::FUNC_END, ""));
-				--func_tab_q;
-				line_nodes.push_back(root);
-			}
-			if (tabs < func_tab_q)
-			{
-				root = std::make_shared<NodeAST>(std::make_shared<Token>(TokenType::FUNC_END, ""));
-				--func_tab_q;
-				line_nodes.push_back(root);
-			}
-			if ((tabs - func_tab_q - cycle_tab_q) < if_tab_q)
-			{
-				root = std::make_shared<NodeAST>(std::make_shared<Token>(TokenType::IF_END, ""));
-				//root->token->type = StringToTokenType("IF_END");
-				--if_tab_q;
-				line_nodes.push_back(root);
-			}
-			if ((tabs - func_tab_q - if_tab_q) < cycle_tab_q)
-			{
-				root = std::make_shared<NodeAST>(std::make_shared<Token>(TokenType::FOR_END, ""));
-				//root->token->type = StringToTokenType("IF_END");
-				--cycle_tab_q;
-				--tokens_size;
-				line_nodes.push_back(root);
+				TokenType top = tabs_stack.top();
+				if(top == TokenType::IF)
+				{
+					root = std::make_shared<NodeAST>(std::make_shared<Token>(TokenType::IF_END, ""));
+					line_nodes.push_back(root);
+				}
+				else if(top == TokenType::FUNC_INIT)
+				{
+					root = std::make_shared<NodeAST>(std::make_shared<Token>(TokenType::FUNC_END, ""));
+					line_nodes.push_back(root);
+				}
+				else if(top == TokenType::FOR)
+				{
+					root = std::make_shared<NodeAST>(std::make_shared<Token>(TokenType::FOR_END, ""));
+					line_nodes.push_back(root);
+				}
+				tabs_stack.pop();
+				size = tabs_stack.size();
 			}
 		}
 
@@ -631,27 +711,27 @@ void Parser::Analys()
 			bool If = false;
 
 			root = std::make_shared<NodeAST>(lexer->tokens[i]);
-			if (TokenTypeSwitch(lexer->tokens[i - 1]->type) == "VAR")
+			if (lexer->tokens[i - 1]->type == TokenType::VAR)
 				root->left = std::make_shared<NodeAST>(lexer->tokens[i - 1]);
-			else if (TokenTypeSwitch(lexer->tokens[i - 1]->type) == "SQ_RIGHT_BRACKET")
+			else if (lexer->tokens[i - 1]->type == TokenType::SQ_RIGHT_BRACKET)
 			{
 				root->left = parseArrayIndex(i - 1);
 			}
 			else
 				throw "Left operand of \"=\" must be variable";
-			for (size_t j = i + 1; TokenTypeSwitch(lexer->tokens[j]->type) != "END"; ++j)
+			for (size_t j = i + 1; lexer->tokens[j]->type != TokenType::END; ++j)
 			{
-				std::string tmp =  TokenTypeSwitch(lexer->tokens[j]->type);
-				if (TokenTypeSwitch(lexer->tokens[j]->type) == "SQ_LEFT_BRACKET" && TokenTypeSwitch(lexer->tokens[j - 1]->type) == "EQ")
+				TokenType tmp =  lexer->tokens[j]->type;
+				if (lexer->tokens[j]->type == TokenType::SQ_LEFT_BRACKET && lexer->tokens[j - 1]->type == TokenType::EQ)
 				{
 					found_right = true;
 					ArrDef = true;
 				}
-				else if (tmp == "NUMBER" || tmp == "STRING" || tmp == "VAR" || tmp == "BOOL" || tmp == "FALSE" || tmp == "TRUE" || tmp == "INPUT")
+				else if (tmp == TokenType::NUMBER || tmp == TokenType::STRING || tmp == TokenType::VAR || tmp == TokenType::BOOL || tmp == TokenType::FALSE || tmp == TokenType::TRUE || tmp == TokenType::INPUT)
 				{
 					found_right = true;
 				}
-				else if (TokenTypeSwitch(lexer->tokens[j]->type) == "IF")
+				else if (lexer->tokens[j]->type == TokenType::IF)
 				{
 
 					found_right = true;
@@ -690,31 +770,25 @@ void Parser::Analys()
 		{
 			++i;
 			bool found_right = false;
-			bool ArrDef = false;
 			bool If = false;
 
 			root = std::make_shared<NodeAST>(lexer->tokens[i]);
-			if (TokenTypeSwitch(lexer->tokens[i - 1]->type) == "VAR")
+			if (lexer->tokens[i - 1]->type == TokenType::VAR)
 				root->left = std::make_shared<NodeAST>(lexer->tokens[i - 1]);
-			else if (TokenTypeSwitch(lexer->tokens[i - 1]->type) == "SQ_RIGHT_BRACKET")
+			else if (lexer->tokens[i - 1]->type == TokenType::SQ_RIGHT_BRACKET)
 			{
 				root->left = parseArrayIndex(i - 1);
 			}
 			else
 				throw "Left operand of \"=\" must be variable";
-			for (size_t j = i + 1; TokenTypeSwitch(lexer->tokens[j]->type) != "END"; ++j)
+			for (size_t j = i + 1; lexer->tokens[j]->type != TokenType::END; ++j)
 			{
-				std::string tmp = TokenTypeSwitch(lexer->tokens[j]->type);
-				if (TokenTypeSwitch(lexer->tokens[j]->type) == "SQ_LEFT_BRACKET" && TokenTypeSwitch(lexer->tokens[j - 1]->type) == "EQ")
-				{
-					found_right = true;
-					ArrDef = true;
-				}
-				else if (tmp == "NUMBER" || tmp == "STRING" || tmp == "VAR" || tmp == "BOOL" || tmp == "FALSE" || tmp == "TRUE" || tmp == "INPUT" || tmp == "INT")
+				TokenType tmp = lexer->tokens[j]->type;
+				if (tmp == TokenType::NUMBER || tmp == TokenType::STRING || tmp == TokenType::VAR || tmp == TokenType::BOOL || tmp == TokenType::FALSE || tmp == TokenType::TRUE || tmp == TokenType::INPUT || tmp == TokenType::INT)
 				{
 					found_right = true;
 				}
-				else if (TokenTypeSwitch(lexer->tokens[j]->type) == "IF")
+				else if (lexer->tokens[j]->type == TokenType::IF)
 				{
 
 					found_right = true;
@@ -726,8 +800,6 @@ void Parser::Analys()
 
 			if (!found_right)
 				throw "Right operand of \"=\" must be variable or number or string";
-			if (ArrDef)
-				root->right = parseArray(i + 2, end_iter);
 			if (If)
 				root->right = parseIF(i + 2, end_iter);
 			else
@@ -756,7 +828,7 @@ void Parser::Analys()
 					root->token->value = lexer->tokens[name]->value;
 					root->token->type = TokenType::FUNC_INIT;
 					line_nodes.push_back(root);
-					++func_tab_q;
+					tabs_stack.push(TokenType::FUNC_INIT);
 					++i;
 				}
 				else
@@ -775,7 +847,7 @@ void Parser::Analys()
 			for (;lexer->tokens[j]->type != TokenType::COLON; ++j);
 			root->right = parseExpr(i + 1, j);
 			line_nodes.push_back(root);
-			++if_tab_q;
+			tabs_stack.push(TokenType::IF);
 			i = j+1;
 		}
 		else if (type == TokenType::FOR)
@@ -785,7 +857,7 @@ void Parser::Analys()
 			for (; lexer->tokens[j]->type != TokenType::COLON; ++j);
 			root = parseFor(i + 1, j);
 			line_nodes.push_back(root);
-			++cycle_tab_q;
+			tabs_stack.push(TokenType::FOR);
 			i = j + 1;
 			++tokens_size;
 		}
@@ -869,4 +941,5 @@ void Parser::Analys()
 
 	if (line_nodes.back()->token->type != TokenType::END)
 		line_nodes.push_back(std::make_shared<NodeAST>(std::make_shared<Token>(TokenType::END, "")));
+
 }

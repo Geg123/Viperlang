@@ -56,4 +56,9 @@ void VarCreator::CreateObject(std::shared_ptr<NodeAST> node)
 	ObjectManager::InsertObject(tmp);
 }
 
-void ArrayCreator::CreateObject(std::shared_ptr<NodeAST> node){}
+void ArrayCreator::CreateObject(std::shared_ptr<NodeAST> root)
+{
+	//std::shared_ptr<Array> array = std::
+	std::shared_ptr<NodeAST> node = root->left;
+
+}

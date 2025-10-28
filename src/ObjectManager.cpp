@@ -59,7 +59,14 @@ Object ObjectManager::getObject(std::string name)
 void ObjectManager::getValue(std::shared_ptr<NodeAST> node)
 {
     std::string name = node->token->value;
-    if(!objects->count(name))
+    if(name == "input")
+    {
+        if(node->right != nullptr)
+            std::cout << node->right->token->value;
+        node->token->value = input();
+        node->token->type = TokenType::STRING;
+    }
+    else if(!objects->count(name))
     {
         std::cerr << "Error: " << name << " is not a Object!";
         system("pause");
@@ -107,19 +114,19 @@ void ObjectManager::run_func(std::shared_ptr<NodeAST> node, std::shared_ptr<Func
     std::shared_ptr<NodeAST> node2 = node;
     for(size_t i = 0; i < def_vars_lenght; ++i)
     {
-        if(node2->right != nullptr)
+        if(node2->left != nullptr)
         {
-            node2 = node2->right;
+            node2 = node2->left;
             Variable tmp(func.def_vars.at(i));
-            CalcExpr(node2);
-            tmp.value = node2->token->value;
-            tmp.type = TokenTypeToBasicVarType(node2->token->type);
+            CalcExpr(node2->right);
+            tmp.value = node2->right->token->value;
+            tmp.type = TokenTypeToBasicVarType(node2->right->token->type);
             Object tmp_obj = std::make_shared<Variable>(tmp);
             scopes.at(func.name).insert({ tmp.name, tmp_obj });
         }
         else
         {
-            std::cerr << "Error: function call has't same quantity parametrs as defeniyion!";
+            std::cerr << "Error: function call has't same quantity parametrs as defeniyion!\n";
             system("pause");
         }
     }
@@ -184,6 +191,13 @@ void ObjectManager::run_func(std::shared_ptr<NodeAST> node, std::shared_ptr<Func
     setScope(getTopScopeStack());
     --func_iter;
     scopes.erase(func.name);
+}
+
+std::string ObjectManager::input()
+{
+    std::string tmp;
+    std::getline(std::cin, tmp);
+    return tmp;
 }
 
 void ObjectManager::setScope(std::string name)

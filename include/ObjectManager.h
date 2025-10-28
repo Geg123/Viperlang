@@ -1,5 +1,4 @@
 #include"Creator.h"
-#include<stack>
 
 class ObjectManager
 {
@@ -30,6 +29,10 @@ public:
     static void decrementIter(){--func_iter;}
     static void CalcExpr(std::shared_ptr<NodeAST> node);
     static void run_func(std::shared_ptr<NodeAST> node, std::shared_ptr<Function> funcptr);
+    //standart functions
+    static void range(std::shared_ptr<NodeAST> node){}
+    static void INT(std::shared_ptr<NodeAST> node){}
+    static std::string input();
 private:
     ObjectManager();
     static inline size_t func_iter = 0;
