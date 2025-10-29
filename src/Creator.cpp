@@ -31,6 +31,11 @@ BasicVarType VarTypeSelector(std::shared_ptr<NodeAST> node)
 
 void FuncCreator::CreateObject(std::shared_ptr<NodeAST> node, size_t& node_iter)
 {
+	if(ObjectManager::isObject(node->token->value))
+	{
+		std::cerr << "Error: " << node->token->value << "has already defenited!";
+        system("pause");
+	}
 	Function func(node->token->value);
 	++node_iter;
 	while(Parser::line_nodes.at(node_iter)->token->type != TokenType::FUNC_END)
@@ -53,12 +58,23 @@ void VarCreator::CreateObject(std::shared_ptr<NodeAST> node)
 	OperatorsManager::DoOperation(node->right);
 	std::shared_ptr<Variable> tmp = std::make_shared<Variable>(node->left->token->value, node->right->token->value);
 	tmp->type = VarTypeSelector(node->right);
+	ObjectManager::deleteObject(node->left->token->value);
 	ObjectManager::InsertObject(tmp);
 }
 
-void ArrayCreator::CreateObject(std::shared_ptr<NodeAST> root)
+void ArrayCreator::CreateObject(std::shared_ptr<NodeAST> node)
 {
-	//std::shared_ptr<Array> array = std::
-	std::shared_ptr<NodeAST> node = root->left;
-
+	std::shared_ptr<Array> array = std::make_shared<Array>(node->left->token->value);
+	std::shared_ptr<NodeAST> root = node->right;
+	size_t iter = 0;
+	while(root->left != nullptr)
+	{
+		root = root->left;
+		OperatorsManager::DoOperation(root->right);
+		array->array.push_back(std::make_shared<Variable>(std::to_string(iter), root->right->token->value));
+		std::get<std::shared_ptr<Variable>>(array->array[iter])->type = VarTypeSelector(root->right);
+		++iter;
+	}
+	ObjectManager::deleteObject(node->left->token->value);
+	ObjectManager::InsertObject(array);
 }

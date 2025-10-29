@@ -44,6 +44,24 @@ void ObjectManager::InsertObject(Object obj)
     }
 }
 
+bool ObjectManager::isObject(std::string name)
+{
+    if(objects->count(name))
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+void ObjectManager::deleteObject(std::string name)
+{
+    if(objects->count(name))
+        objects->erase(name);
+}
+
 Object ObjectManager::getObject(std::string name)
 {
     if(objects->count(name))
@@ -96,6 +114,25 @@ void ObjectManager::getValue(std::shared_ptr<NodeAST> node)
         std::cerr << "Error: " << name << " is not a Variable!";
         system("pause");
     }
+    else if(node->token->type == TokenType::ARRAY)
+    {
+        auto tmp = *std::get_if<std::shared_ptr<Array>>(&objects->at(name));
+        if(tmp != nullptr)
+        {
+            CalcExpr(node->right);
+            int i = std::stoi(node->right->token->value);
+            if(tmp->array.size() > i)
+            {
+                auto tmp2 = std::get<std::shared_ptr<Variable>>(tmp->array[i]);
+                node->token->value = tmp2->value;
+                node->token->type = BasicVarTypeToType(tmp2->type);
+                return;
+            }
+        }
+        std::cerr << "Error: " << name << " is not a Array!";
+        system("pause");
+    }
+    
 }
 
 void ObjectManager::run_func(std::shared_ptr<NodeAST> node, std::shared_ptr<Function> funcptr)

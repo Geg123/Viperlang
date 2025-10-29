@@ -5,6 +5,8 @@ class ObjectManager
 public:
     static void InsertObject(Object obj);
     static Object getObject(std::string name);
+    static bool isObject(std::string name);
+    static void deleteObject(std::string name);
     static void getValue(std::shared_ptr<NodeAST> node);
     static void setScope(std::string name);
     static void start()

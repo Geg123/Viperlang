@@ -321,10 +321,11 @@ void String::Functor::operator()(MultOperator& op)
     {
         int i = std::stoi(node->left->token->value);
         std::string tmp_str = node->right->token->value;
-        node->right->token->value = "";
+        node->token->value = "";
         while (i)
         {
             node->token->value += tmp_str;
+            --i;
         }
         node->token->type = TokenType::STRING;
     }

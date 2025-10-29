@@ -164,7 +164,7 @@ std::shared_ptr<NodeAST> Parser::parseExpr(size_t iter, size_t end_iter)
 			else if(lexer->tokens[i + 1]->type == TokenType::SQ_LEFT_BRACKET)
 			{
 				int brackets_pares = 0;
-				size_t j = i + 1;
+				size_t j = i + 2;
 				while (1)
 				{
 					if (lexer->tokens[j]->type == TokenType::SQ_LEFT_BRACKET)
@@ -333,6 +333,7 @@ std::shared_ptr<NodeAST> Parser::parseExpr(size_t iter, size_t end_iter)
 			++k;
 			}
 			nodes.push_back(parseArray(i, k));
+			i = k;
 		}
 	}
 	if(power)
